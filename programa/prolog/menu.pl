@@ -83,13 +83,67 @@ ejecutar_opcion(_) :-
     writeln('Opcion invalida. Intente de nuevo.').
 
 
-% opcion_consultar_caso, opcion_investigar, opcion_posibles_responsables, opcion_explicaciones, opcion_resolver_caso
+% Entradas: ninguna.
+% Salidas: ninguna (texto en consola).
+% Restricciones: ninguna.
+% Objetivo: mostrar la informacion registrada del caso.
+
+opcion_consultar_caso :-
+    mostrar_personas,
+    nl,
+    mostrar_lugares,
+    nl,
+    mostrar_objetos.
+
+
+% Entradas: ninguna.
+% Salidas: ninguna (texto en consola).
+% Restricciones: ninguna.
+% Objetivo: mostrar las personas definidas mediante persona/1.
+
+mostrar_personas :-
+    writeln('Personas relacionadas con el caso:'),
+    (   persona(_)
+    ->  forall(persona(Persona),
+               format('  - ~w~n', [Persona]))
+    ;   writeln('  No hay personas registradas.')
+    ).
+
+
+% Entradas: ninguna.
+% Salidas: ninguna (texto en consola).
+% Restricciones: ninguna.
+% Objetivo: mostrar los lugares definidos mediante lugar/2 con su descripcion.
+
+mostrar_lugares :-
+    writeln('Lugares del caso:'),
+    (   lugar(_, _)
+    ->  forall(lugar(Lugar, Descripcion),
+               format('  - ~w: ~s~n', [Lugar, Descripcion]))
+    ;   writeln('  No hay lugares registrados.')
+    ).
+
+
+% Entradas: ninguna.
+% Salidas: ninguna (texto en consola).
+% Restricciones: ninguna.
+% Objetivo: mostrar los objetos definidos mediante objeto/1.
+
+mostrar_objetos :-
+    writeln('Objetos del caso:'),
+    (   objeto(_)
+    ->  forall(objeto(Objeto),
+               format('  - ~w~n', [Objeto]))
+    ;   writeln('  No hay objetos registrados.')
+    ).
+
+
+% opcion_investigar, opcion_posibles_responsables, opcion_explicaciones, opcion_resolver_caso
 % Entradas: ninguna.
 % Salidas: ninguna (texto en consola).
 % Restricciones: se completan conforme se implementan los predicados de juego en predicados.pl.
 % Objetivo: atender cada opcion del menu principal.
 
-opcion_consultar_caso        :- pendiente.
 opcion_investigar            :- pendiente.
 opcion_posibles_responsables :- pendiente.
 opcion_explicaciones         :- pendiente.
