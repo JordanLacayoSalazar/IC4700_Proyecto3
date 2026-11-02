@@ -105,8 +105,22 @@ mostrar_personas :-
     writeln('Personas relacionadas con el caso:'),
     (   persona(_)
     ->  forall(persona(Persona),
-               format('  - ~w~n', [Persona]))
+               mostrar_persona(Persona))
     ;   writeln('  No hay personas registradas.')
+    ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si la persona no tiene accesos directos registrados se indica en el texto.
+% Objetivo: mostrar una persona y los lugares a los que tiene acceso directo segun acceso/2.
+
+mostrar_persona(Persona) :-
+    findall(Lugar, acceso(Persona, Lugar), Lugares),
+    (   Lugares == []
+    ->  format('  - ~w (sin accesos directos registrados)~n', [Persona])
+    ;   atomic_list_concat(Lugares, ', ', Texto),
+        format('  - ~w (acceso directo: ~w)~n', [Persona, Texto])
     ).
 
 
@@ -127,14 +141,26 @@ mostrar_lugares :-
 % Entradas: ninguna.
 % Salidas: ninguna (texto en consola).
 % Restricciones: ninguna.
-% Objetivo: mostrar los objetos definidos mediante objeto/1.
+% Objetivo: mostrar los objetos definidos mediante objeto/1 junto con su ubicacion.
 
 mostrar_objetos :-
     writeln('Objetos del caso:'),
     (   objeto(_)
     ->  forall(objeto(Objeto),
-               format('  - ~w~n', [Objeto]))
+               mostrar_objeto(Objeto))
     ;   writeln('  No hay objetos registrados.')
+    ).
+
+
+% Entradas: Objeto definido en objeto/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si el objeto no tiene ubicacion registrada se indica en el texto.
+% Objetivo: mostrar un objeto y el lugar donde se encontraba segun ubicado/2.
+
+mostrar_objeto(Objeto) :-
+    (   ubicado(Objeto, Lugar)
+    ->  format('  - ~w (ubicado en ~w)~n', [Objeto, Lugar])
+    ;   format('  - ~w (sin ubicacion registrada)~n', [Objeto])
     ).
 
 

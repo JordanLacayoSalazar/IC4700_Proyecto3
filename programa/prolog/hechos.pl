@@ -43,3 +43,51 @@ objeto(kit_reparacion).
 objeto(tablet_camaras).
 objeto(escaner_medico).
 objeto(bidon_combustible).
+
+
+% Entradas: ninguna.
+% Salidas: Objeto y Lugar donde se encontraba.
+% Restricciones: Objeto debe estar definido en objeto/1 y Lugar en lugar/2.
+% Objetivo: establecer donde se encontraba cada objeto del caso.
+
+ubicado(tarjeta_admin, administracion).
+ubicado(llave_reactor, seguridad).
+ubicado(kit_reparacion, almacen).
+ubicado(tablet_camaras, seguridad).
+ubicado(escaner_medico, enfermeria).
+ubicado(bidon_combustible, motores).
+
+
+% Entradas: ninguna.
+% Salidas: Persona y Lugar al que tiene acceso directo.
+% Restricciones: Persona debe estar definida en persona/1 y Lugar en lugar/2.
+% Objetivo: registrar los accesos directos de cada tripulante a las salas de la nave.
+
+acceso(leonel, cafeteria).
+acceso(leonel, navegacion).
+acceso(leonel, comunicaciones).
+acceso(david, cafeteria).
+acceso(david, seguridad).
+acceso(jordan, cafeteria).
+acceso(jordan, electricidad).
+acceso(jordan, motores).
+acceso(diego, cafeteria).
+acceso(diego, enfermeria).
+acceso(jeremy, cafeteria).
+acceso(jeremy, administracion).
+acceso(jeremy, comunicaciones).
+acceso(josimar, cafeteria).
+acceso(josimar, almacen).
+acceso(josimar, motores).
+acceso(melany, cafeteria).
+acceso(melany, electricidad).
+acceso(melany, almacen).
+acceso(ronaldo, cafeteria).
+acceso(ronaldo, reactor).
+acceso(ronaldo, motores).
+acceso(tiffany, cafeteria).
+acceso(tiffany, enfermeria).
+acceso(tiffany, administracion).
+acceso(cristian, cafeteria).
+acceso(cristian, seguridad).
+acceso(cristian, navegacion).
