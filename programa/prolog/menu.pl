@@ -89,11 +89,29 @@ ejecutar_opcion(_) :-
 % Objetivo: mostrar la informacion registrada del caso.
 
 opcion_consultar_caso :-
+    mostrar_evento,
+    nl,
     mostrar_personas,
     nl,
     mostrar_lugares,
     nl,
     mostrar_objetos.
+
+
+% Entradas: ninguna.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si no hay evento o hay mas de uno se indica en el texto.
+% Objetivo: mostrar el evento central del caso con su lugar y hora.
+
+mostrar_evento :-
+    writeln('Evento central:'),
+    (   evento_central(Nombre, Lugar, Hora)
+    ->  formato_hora(Hora, Texto),
+        format('  ~w en ~w a las ~w~n', [Nombre, Lugar, Texto])
+    ;   evento(_, _, _)
+    ->  writeln('  El caso tiene mas de un evento; debe existir un unico evento central.')
+    ;   writeln('  No hay evento registrado.')
+    ).
 
 
 % Entradas: ninguna.
@@ -112,16 +130,49 @@ mostrar_personas :-
 
 % Entradas: Persona definida en persona/1.
 % Salidas: ninguna (texto en consola).
-% Restricciones: si la persona no tiene accesos directos registrados se indica en el texto.
-% Objetivo: mostrar una persona y los lugares a los que tiene acceso directo segun acceso/2.
+% Restricciones: si la persona no tiene accesos registrados se indica en el texto.
+% Objetivo: mostrar una persona, sus accesos directos y los accesos que obtiene mediante objetos.
 
 mostrar_persona(Persona) :-
+    format('  - ~w~n', [Persona]),
     findall(Lugar, acceso(Persona, Lugar), Lugares),
     (   Lugares == []
-    ->  format('  - ~w (sin accesos directos registrados)~n', [Persona])
+    ->  writeln('      acceso directo: ninguno')
     ;   atomic_list_concat(Lugares, ', ', Texto),
-        format('  - ~w (acceso directo: ~w)~n', [Persona, Texto])
+        format('      acceso directo: ~w~n', [Texto])
+    ),
+    forall(( acceso_mediante_objeto(Persona, LugarObjeto, Objeto),
+             \+ acceso(Persona, LugarObjeto) ),
+           format('      acceso mediante objeto: ~w (con ~w)~n', [LugarObjeto, Objeto])),
+    mostrar_movimientos(Persona).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si la persona no tiene movimientos registrados se indica en el texto.
+% Objetivo: mostrar los movimientos de una persona segun estuvo/3, ordenados por hora.
+
+mostrar_movimientos(Persona) :-
+    findall(Hora-Lugar, estuvo(Persona, Lugar, Hora), Movimientos),
+    msort(Movimientos, Ordenados),
+    (   Ordenados == []
+    ->  writeln('      movimientos: ninguno registrado')
+    ;   writeln('      movimientos:'),
+        forall(member(Hora-Lugar, Ordenados),
+               ( formato_hora(Hora, Texto),
+                 format('        ~w  ~w~n', [Texto, Lugar]) ))
     ).
+
+
+% Entradas: Hora en formato HHMM.
+% Salidas: Texto con la hora en formato HH:MM.
+% Restricciones: Hora debe ser un entero.
+% Objetivo: presentar una hora HHMM de forma legible.
+
+formato_hora(Hora, Texto) :-
+    Horas is Hora // 100,
+    Minutos is Hora mod 100,
+    format(atom(Texto), '~|~`0t~d~2+:~|~`0t~d~2+', [Horas, Minutos]).
 
 
 % Entradas: ninguna.

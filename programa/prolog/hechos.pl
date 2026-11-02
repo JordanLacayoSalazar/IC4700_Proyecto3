@@ -91,3 +91,59 @@ acceso(tiffany, administracion).
 acceso(cristian, cafeteria).
 acceso(cristian, seguridad).
 acceso(cristian, navegacion).
+
+
+% Entradas: ninguna.
+% Salidas: Lugar y Objeto necesario para ingresar a el.
+% Restricciones: Lugar debe estar definido en lugar/2 y Objeto en objeto/1.
+% Objetivo: registrar las salas cuyo acceso esta condicionado por un objeto.
+
+accesoPorObjeto(reactor, llave_reactor).
+accesoPorObjeto(electricidad, kit_reparacion).
+accesoPorObjeto(comunicaciones, tarjeta_admin).
+
+
+% Entradas: ninguna.
+% Salidas: Persona, Lugar y Hora en que fue registrada.
+% Restricciones: Persona debe estar definida en persona/1, Lugar en lugar/2 y Hora en formato HHMM.
+% Objetivo: registrar los movimientos conocidos de cada tripulante dentro de la nave.
+
+estuvo(leonel, cafeteria, 1900).
+estuvo(leonel, navegacion, 1930).
+estuvo(leonel, comunicaciones, 2000).
+estuvo(david, cafeteria, 1900).
+estuvo(david, seguridad, 1940).
+estuvo(david, reactor, 1955).
+estuvo(jordan, cafeteria, 1910).
+estuvo(jordan, motores, 1945).
+estuvo(jordan, motores, 2005).
+estuvo(diego, cafeteria, 1900).
+estuvo(diego, enfermeria, 1935).
+estuvo(diego, enfermeria, 2010).
+estuvo(jeremy, cafeteria, 1905).
+estuvo(jeremy, administracion, 1930).
+estuvo(jeremy, comunicaciones, 2000).
+estuvo(josimar, cafeteria, 1900).
+estuvo(josimar, almacen, 1940).
+estuvo(josimar, electricidad, 1955).
+estuvo(josimar, cafeteria, 2015).
+estuvo(melany, cafeteria, 1910).
+estuvo(melany, electricidad, 1930).
+estuvo(melany, almacen, 2000).
+estuvo(ronaldo, cafeteria, 1900).
+estuvo(ronaldo, reactor, 1945).
+estuvo(ronaldo, motores, 2000).
+estuvo(tiffany, cafeteria, 1905).
+estuvo(tiffany, enfermeria, 1940).
+estuvo(tiffany, administracion, 2005).
+estuvo(cristian, cafeteria, 1910).
+estuvo(cristian, seguridad, 1935).
+estuvo(cristian, navegacion, 1958).
+
+
+% Entradas: ninguna.
+% Salidas: Nombre del evento, Lugar y Hora en que ocurrio.
+% Restricciones: debe existir un unico evento por caso; Lugar debe estar definido en lugar/2 y Hora en formato HHMM.
+% Objetivo: definir el evento central que debe ser investigado.
+
+evento(sabotaje, electricidad, 2000).
