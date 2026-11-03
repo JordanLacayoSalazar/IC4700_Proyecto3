@@ -3,7 +3,7 @@
 % Restricciones: ninguna.
 % Objetivo: permitir que las reglas fallen sin error cuando un caso no define hechos opcionales.
 
-:- dynamic ubicado/2, accesoPorObjeto/2.
+:- dynamic ubicado/2, accesoPorObjeto/2, evidencia/3, corresponde/2, testimonio/3.
 
 
 % Entradas: Hora (numero).

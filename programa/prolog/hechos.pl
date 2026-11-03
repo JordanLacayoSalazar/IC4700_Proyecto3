@@ -147,3 +147,42 @@ estuvo(cristian, navegacion, 1958).
 % Objetivo: definir el evento central que debe ser investigado.
 
 evento(sabotaje, electricidad, 2000).
+
+
+% Entradas: ninguna.
+% Salidas: Evidencia, Lugar y Hora en que fue encontrada.
+% Restricciones: Evidencia debe ser un atomo unico; Lugar debe estar definido en lugar/2 y Hora en formato HHMM.
+% Objetivo: registrar las evidencias encontradas durante la investigacion.
+
+evidencia(cables_cortados, electricidad, 2000).
+evidencia(huella, electricidad, 2002).
+evidencia(kit_abandonado, electricidad, 2005).
+evidencia(guante, electricidad, 1958).
+evidencia(grabacion_camaras, seguridad, 1940).
+
+
+% Entradas: ninguna.
+% Salidas: Evidencia y Persona con la que fue relacionada.
+% Restricciones: Evidencia debe estar definida en evidencia/3 y Persona en persona/1.
+% Objetivo: relacionar las evidencias encontradas con los tripulantes.
+
+corresponde(huella, josimar).
+corresponde(kit_abandonado, josimar).
+corresponde(guante, jordan).
+corresponde(grabacion_camaras, david).
+
+
+% Entradas: ninguna.
+% Salidas: Persona, Lugar y Hora que la persona declara.
+% Restricciones: Persona debe estar definida en persona/1, Lugar en lugar/2 y Hora en formato HHMM.
+% Objetivo: registrar los testimonios que dio cada tripulante sobre su ubicacion.
+
+testimonio(leonel, comunicaciones, 2000).
+testimonio(david, seguridad, 1955).
+testimonio(jordan, motores, 2000).
+testimonio(diego, enfermeria, 2000).
+testimonio(josimar, cafeteria, 1955).
+testimonio(melany, almacen, 2000).
+testimonio(ronaldo, motores, 2000).
+testimonio(tiffany, administracion, 2000).
+testimonio(cristian, navegacion, 1958).

@@ -95,7 +95,9 @@ opcion_consultar_caso :-
     nl,
     mostrar_lugares,
     nl,
-    mostrar_objetos.
+    mostrar_objetos,
+    nl,
+    mostrar_evidencias.
 
 
 % Entradas: ninguna.
@@ -144,7 +146,8 @@ mostrar_persona(Persona) :-
     forall(( acceso_mediante_objeto(Persona, LugarObjeto, Objeto),
              \+ acceso(Persona, LugarObjeto) ),
            format('      acceso mediante objeto: ~w (con ~w)~n', [LugarObjeto, Objeto])),
-    mostrar_movimientos(Persona).
+    mostrar_movimientos(Persona),
+    mostrar_testimonios(Persona).
 
 
 % Entradas: Persona definida en persona/1.
@@ -161,6 +164,23 @@ mostrar_movimientos(Persona) :-
         forall(member(Hora-Lugar, Ordenados),
                ( formato_hora(Hora, Texto),
                  format('        ~w  ~w~n', [Texto, Lugar]) ))
+    ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si la persona no tiene testimonios registrados se indica en el texto.
+% Objetivo: mostrar los testimonios de una persona segun testimonio/3, ordenados por hora.
+
+mostrar_testimonios(Persona) :-
+    findall(Hora-Lugar, testimonio(Persona, Lugar, Hora), Testimonios),
+    msort(Testimonios, Ordenados),
+    (   Ordenados == []
+    ->  writeln('      testimonios: ninguno registrado')
+    ;   writeln('      testimonios:'),
+        forall(member(Hora-Lugar, Ordenados),
+               ( formato_hora(Hora, Texto),
+                 format('        ~w  dice que estuvo en ~w~n', [Texto, Lugar]) ))
     ).
 
 
@@ -213,6 +233,36 @@ mostrar_objeto(Objeto) :-
     ->  format('  - ~w (ubicado en ~w)~n', [Objeto, Lugar])
     ;   format('  - ~w (sin ubicacion registrada)~n', [Objeto])
     ).
+
+
+% Entradas: ninguna.
+% Salidas: ninguna (texto en consola).
+% Restricciones: ninguna.
+% Objetivo: mostrar las evidencias definidas mediante evidencia/3.
+
+mostrar_evidencias :-
+    writeln('Evidencias del caso:'),
+    (   evidencia(_, _, _)
+    ->  forall(evidencia(Evidencia, Lugar, Hora),
+               mostrar_evidencia(Evidencia, Lugar, Hora))
+    ;   writeln('  No hay evidencias registradas.')
+    ).
+
+
+% Entradas: Evidencia, Lugar y Hora definidos en evidencia/3.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si la evidencia no tiene personas relacionadas se indica en el texto.
+% Objetivo: mostrar una evidencia y las personas con las que se relaciona segun corresponde/2.
+
+mostrar_evidencia(Evidencia, Lugar, Hora) :-
+    formato_hora(Hora, TextoHora),
+    findall(Persona, corresponde(Evidencia, Persona), Personas),
+    (   Personas == []
+    ->  TextoPersonas = 'sin persona relacionada'
+    ;   atomic_list_concat(Personas, ', ', Lista),
+        atom_concat('corresponde a ', Lista, TextoPersonas)
+    ),
+    format('  - ~w en ~w a las ~w (~w)~n', [Evidencia, Lugar, TextoHora, TextoPersonas]).
 
 
 % opcion_investigar, opcion_posibles_responsables, opcion_explicaciones, opcion_resolver_caso
