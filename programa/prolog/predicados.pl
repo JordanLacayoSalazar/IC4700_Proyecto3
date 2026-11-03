@@ -19,6 +19,21 @@ hora_valida(Hora) :-
     Minutos >= 0, Minutos =< 59.
 
 
+% Entradas: Persona, Lugar, Inicio y Fin (pueden ser variables).
+% Salidas: verdadero si la Persona estuvo en el Lugar dentro del intervalo indicado.
+% Restricciones: Inicio y Fin deben ser horas validas en formato HHMM y el intervalo es inclusivo; Inicio no puede ser mayor que Fin.
+% Objetivo: consultar los movimientos de una persona registrados durante un intervalo de tiempo.
+
+estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
+    hora_valida(Inicio),
+    hora_valida(Fin),
+    Inicio =< Fin,
+    estuvo(Persona, Lugar, Hora),
+    hora_valida(Hora),
+    Hora >= Inicio,
+    Hora =< Fin.
+
+
 % Entradas: Nombre, Lugar y Hora (pueden ser variables).
 % Salidas: verdadero si el caso contiene exactamente un evento, unificando sus datos.
 % Restricciones: falla si el caso no tiene eventos o tiene mas de uno.

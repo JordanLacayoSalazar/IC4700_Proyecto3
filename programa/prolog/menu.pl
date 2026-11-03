@@ -8,6 +8,8 @@ opcion_menu(2, 'Investigar a una persona',       opcion_investigar).
 opcion_menu(3, 'Obtener posibles responsables',  opcion_posibles_responsables).
 opcion_menu(4, 'Generar explicaciones',          opcion_explicaciones).
 opcion_menu(5, 'Resolver el caso',               opcion_resolver_caso).
+opcion_menu(6, 'Consultar movimiento por hora',   opcion_consultar_estadia).
+opcion_menu(7, 'Consultar movimientos por intervalo', opcion_consultar_intervalo).
 
 
 % Entradas: ninguna.
@@ -98,6 +100,115 @@ opcion_consultar_caso :-
     mostrar_objetos,
     nl,
     mostrar_evidencias.
+
+
+% Entradas: ninguna (lee Persona, Lugar y Hora desde la consola).
+% Salidas: ninguna (muestra si existe un movimiento coincidente).
+% Restricciones: Persona y Lugar deben estar registrados; Hora debe ser valida en formato HHMM.
+% Objetivo: consultar un movimiento puntual mediante el predicado estuvo/3.
+
+opcion_consultar_estadia :-
+    nl,
+    writeln('Consultar movimiento por hora:'),
+    leer_consulta('la persona', Persona),
+    leer_consulta('el lugar', Lugar),
+    leer_consulta('la hora en formato HHMM', Hora),
+    (   (   Persona == fin_entrada
+        ;   Lugar == fin_entrada
+        ;   Hora == fin_entrada
+        )
+    ->  writeln('Consulta cancelada por fin de entrada.')
+    ;   \+ atom(Persona)
+    ->  writeln('La persona debe ser un atomo.')
+    ;   \+ persona(Persona)
+    ->  writeln('La persona no esta registrada en el caso.')
+    ;   \+ atom(Lugar)
+    ->  writeln('El lugar debe ser un atomo.')
+    ;   \+ lugar(Lugar, _)
+    ->  writeln('El lugar no esta registrado en el caso.')
+    ;   \+ hora_valida(Hora)
+    ->  writeln('La hora no es valida; use el formato HHMM.')
+    ;   estuvo(Persona, Lugar, Hora)
+    ->  formato_hora(Hora, TextoHora),
+        format('~w estuvo en ~w a las ~w.~n', [Persona, Lugar, TextoHora])
+    ;   formato_hora(Hora, TextoHora),
+        format('No hay un movimiento registrado de ~w en ~w a las ~w.~n',
+               [Persona, Lugar, TextoHora])
+    ).
+
+
+% Entradas: ninguna (lee Persona, Lugar, Inicio y Fin desde la consola).
+% Salidas: ninguna (muestra los movimientos coincidentes).
+% Restricciones: Persona y Lugar deben estar registrados; Inicio y Fin deben ser horas validas y formar un intervalo inclusivo.
+% Objetivo: consultar los movimientos de una persona dentro de un intervalo mediante estuvo_en_intervalo/4.
+
+opcion_consultar_intervalo :-
+    nl,
+    writeln('Consultar movimientos por intervalo:'),
+    leer_consulta('la persona', Persona),
+    leer_consulta('el lugar', Lugar),
+    leer_consulta('la hora inicial en formato HHMM', Inicio),
+    leer_consulta('la hora final en formato HHMM', Fin),
+    (   (   Persona == fin_entrada
+        ;   Lugar == fin_entrada
+        ;   Inicio == fin_entrada
+        ;   Fin == fin_entrada
+        )
+    ->  writeln('Consulta cancelada por fin de entrada.')
+    ;   \+ atom(Persona)
+    ->  writeln('La persona debe ser un atomo.')
+    ;   \+ persona(Persona)
+    ->  writeln('La persona no esta registrada en el caso.')
+    ;   \+ atom(Lugar)
+    ->  writeln('El lugar debe ser un atomo.')
+    ;   \+ lugar(Lugar, _)
+    ->  writeln('El lugar no esta registrado en el caso.')
+    ;   \+ hora_valida(Inicio)
+    ->  writeln('La hora inicial no es valida; use el formato HHMM.')
+    ;   \+ hora_valida(Fin)
+    ->  writeln('La hora final no es valida; use el formato HHMM.')
+    ;   Inicio > Fin
+    ->  writeln('La hora inicial no puede ser mayor que la hora final.')
+    ;   (   estuvo_en_intervalo(Persona, Lugar, Inicio, Fin)
+        ->  findall(Hora,
+                    ( estuvo(Persona, Lugar, Hora),
+                      Hora >= Inicio,
+                      Hora =< Fin ),
+                    Movimientos)
+        ;   Movimientos = []
+        ),
+        msort(Movimientos, Ordenados),
+        mostrar_movimientos_intervalo(Persona, Lugar, Ordenados)
+    ).
+
+
+% Entradas: Texto de la consulta y una variable para el termino digitado.
+% Salidas: Termino leido; fin_entrada si se alcanza el fin de la entrada.
+% Restricciones: el termino digitado debe terminar con punto.
+% Objetivo: solicitar y leer un dato para una consulta del menu.
+
+leer_consulta(Texto, Termino) :-
+    format('Digite ~w seguido de punto: ', [Texto]),
+    catch(read(Entrada), _, Entrada = invalida),
+    (   Entrada == end_of_file
+    ->  Termino = fin_entrada
+    ;   Termino = Entrada
+    ).
+
+
+% Entradas: Persona, Lugar y lista de horas registradas.
+% Salidas: ninguna (texto en consola).
+% Restricciones: las horas se presentan en orden ascendente.
+% Objetivo: mostrar los movimientos encontrados para una consulta por intervalo.
+
+mostrar_movimientos_intervalo(_, _, []) :-
+    writeln('No hay movimientos registrados para esa persona, lugar e intervalo.').
+mostrar_movimientos_intervalo(Persona, Lugar, Horas) :-
+    writeln('Movimientos encontrados:'),
+    forall(member(Hora, Horas),
+           ( formato_hora(Hora, TextoHora),
+             format('  ~w estuvo en ~w a las ~w.~n',
+                    [Persona, Lugar, TextoHora]) )).
 
 
 % Entradas: ninguna.
