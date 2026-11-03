@@ -258,7 +258,9 @@ mostrar_persona(Persona) :-
              \+ acceso(Persona, LugarObjeto) ),
            format('      acceso mediante objeto: ~w (con ~w)~n', [LugarObjeto, Objeto])),
     mostrar_movimientos(Persona),
-    mostrar_testimonios(Persona).
+    mostrar_testimonios(Persona),
+    mostrar_evidencias_persona(Persona),
+    mostrar_coartada_persona(Persona).
 
 
 % Entradas: Persona definida en persona/1.
@@ -292,6 +294,37 @@ mostrar_testimonios(Persona) :-
         forall(member(Hora-Lugar, Ordenados),
                ( formato_hora(Hora, Texto),
                  format('        ~w  dice que estuvo en ~w~n', [Texto, Lugar]) ))
+    ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si no hay evidencias relacionadas se indica en el texto.
+% Objetivo: mostrar las evidencias asociadas a una persona segun corresponde/2.
+
+mostrar_evidencias_persona(Persona) :-
+    evidencias_de(Persona, Evidencias),
+    (   Evidencias == []
+    ->  writeln('      evidencias relacionadas: ninguna')
+    ;   atomic_list_concat(Evidencias, ', ', Texto),
+        format('      evidencias relacionadas: ~w~n', [Texto])
+    ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: se indica que no se pudo establecer una coartada si la informacion disponible no permite inferirla.
+% Objetivo: mostrar si los testimonios y movimientos de una persona respaldan una posible coartada para el evento.
+
+mostrar_coartada_persona(Persona) :-
+    (   evento_central(_, LugarEvento, HoraEvento),
+        tiene_coartada(Persona),
+        testimonio(Persona, LugarTestimonio, HoraEvento),
+        LugarTestimonio \= LugarEvento
+    ->  formato_hora(HoraEvento, TextoHora),
+        format('      posible coartada: movimiento y testimonio corroborados en ~w a las ~w~n',
+               [LugarTestimonio, TextoHora])
+    ;   writeln('      posible coartada: no se pudo establecer con la informacion disponible')
     ).
 
 

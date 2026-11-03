@@ -34,6 +34,30 @@ estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
     Hora =< Fin.
 
 
+% Entradas: Persona y una variable para la lista de evidencias.
+% Salidas: Lista ordenada sin duplicados de las evidencias relacionadas con la Persona.
+% Restricciones: Persona debe estar definida mediante persona/1; la lista puede estar vacia.
+% Objetivo: reunir las evidencias asociadas a una persona mediante corresponde/2.
+
+evidencias_de(Persona, Evidencias) :-
+    persona(Persona),
+    findall(Evidencia, corresponde(Evidencia, Persona), ListaEvidencias),
+    sort(ListaEvidencias, Evidencias).
+
+
+% Entradas: Persona (puede ser variable).
+% Salidas: verdadero si existe una posible coartada corroborada para la Persona.
+% Restricciones: debe existir un unico evento; un testimonio y un movimiento deben ubicar a la Persona en el mismo lugar y hora del evento, en un lugar distinto al evento.
+% Objetivo: inferir una posible coartada relacionando testimonios, movimientos y el momento y lugar del evento.
+
+tiene_coartada(Persona) :-
+    evento_central(_, LugarEvento, HoraEvento),
+    hora_valida(HoraEvento),
+    testimonio(Persona, LugarTestimonio, HoraEvento),
+    LugarTestimonio \= LugarEvento,
+    estuvo(Persona, LugarTestimonio, HoraEvento).
+
+
 % Entradas: Nombre, Lugar y Hora (pueden ser variables).
 % Salidas: verdadero si el caso contiene exactamente un evento, unificando sus datos.
 % Restricciones: falla si el caso no tiene eventos o tiene mas de uno.
