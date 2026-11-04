@@ -259,6 +259,7 @@ mostrar_persona(Persona) :-
            format('      acceso mediante objeto: ~w (con ~w)~n', [LugarObjeto, Objeto])),
     mostrar_movimientos(Persona),
     mostrar_testimonios(Persona),
+    mostrar_contradicciones_persona(Persona),
     mostrar_evidencias_persona(Persona),
     mostrar_coartada_persona(Persona).
 
@@ -294,6 +295,26 @@ mostrar_testimonios(Persona) :-
         forall(member(Hora-Lugar, Ordenados),
                ( formato_hora(Hora, Texto),
                  format('        ~w  dice que estuvo en ~w~n', [Texto, Lugar]) ))
+    ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: si no hay contradicciones entre testimonios y movimientos se indica en el texto.
+% Objetivo: mostrar las diferencias encontradas entre lo declarado y lo registrado para una persona.
+
+mostrar_contradicciones_persona(Persona) :-
+    findall(Hora-LugarTestimonio-LugarMovimiento,
+            contradiccion_de(Persona, Hora, LugarTestimonio, LugarMovimiento),
+            Contradicciones),
+    sort(Contradicciones, Ordenadas),
+    (   Ordenadas == []
+    ->  writeln('      contradicciones: ninguna detectada')
+    ;   writeln('      contradicciones entre testimonios y movimientos:'),
+        forall(member(Hora-LugarTestimonio-LugarMovimiento, Ordenadas),
+               ( formato_hora(Hora, TextoHora),
+                 format('        ~w  declara ~w, pero el movimiento registrado indica ~w~n',
+                        [TextoHora, LugarTestimonio, LugarMovimiento]) ))
     ).
 
 

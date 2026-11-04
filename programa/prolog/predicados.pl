@@ -58,6 +58,28 @@ tiene_coartada(Persona) :-
     estuvo(Persona, LugarTestimonio, HoraEvento).
 
 
+% Entradas: Persona (puede ser variable).
+% Salidas: verdadero si existe una diferencia entre un testimonio y un movimiento de la Persona.
+% Restricciones: la hora del testimonio debe ser valida y ambas fuentes deben ubicar a la Persona en lugares distintos durante la misma hora.
+% Objetivo: inferir contradicciones comparando los testimonios y los movimientos registrados, sin almacenar una conclusion explicita.
+
+tiene_contradiccion(Persona) :-
+    contradiccion_de(Persona, _, _, _).
+
+
+% Entradas: Persona, Hora, LugarTestimonio y LugarMovimiento (pueden ser variables).
+% Salidas: una contradiccion encontrada entre el lugar declarado y el lugar registrado para la Persona.
+% Restricciones: Persona debe estar definida mediante persona/1; Hora debe ser valida; los lugares deben ser distintos.
+% Objetivo: identificar y describir una contradiccion entre testimonio/3 y estuvo/3.
+
+contradiccion_de(Persona, Hora, LugarTestimonio, LugarMovimiento) :-
+    persona(Persona),
+    testimonio(Persona, LugarTestimonio, Hora),
+    hora_valida(Hora),
+    estuvo(Persona, LugarMovimiento, Hora),
+    LugarTestimonio \= LugarMovimiento.
+
+
 % Entradas: Nombre, Lugar y Hora (pueden ser variables).
 % Salidas: verdadero si el caso contiene exactamente un evento, unificando sus datos.
 % Restricciones: falla si el caso no tiene eventos o tiene mas de uno.
