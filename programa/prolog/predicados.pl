@@ -80,6 +80,49 @@ contradiccion_de(Persona, Hora, LugarTestimonio, LugarMovimiento) :-
     LugarTestimonio \= LugarMovimiento.
 
 
+% Entradas: Persona (puede ser variable).
+% Salidas: verdadero si la Persona tiene acceso al lugar del evento y al menos un indicio relacionado con este.
+% Restricciones: debe existir un unico evento; el indicio debe ser presencia en el lugar a la hora del evento, evidencia atribuida hallada en ese lugar o contradiccion a la hora del evento.
+% Objetivo: inferir posibles sospechosos mediante la combinacion de accesos, movimientos, evidencias y contradicciones relevantes.
+
+posible_sospechoso(Persona) :-
+    persona(Persona),
+    evento_central(_, LugarEvento, HoraEvento),
+    hora_valida(HoraEvento),
+    tiene_acceso(Persona, LugarEvento),
+    once((  estuvo(Persona, LugarEvento, HoraEvento)
+         ;  evidencia_en_evento(Persona, LugarEvento, _, _)
+         ;  contradiccion_de(Persona, HoraEvento, _, _)
+         )).
+
+
+% Entradas: Persona, Lugar del evento y variables para la evidencia y su hora.
+% Salidas: verdadero si una evidencia encontrada en el Lugar esta relacionada con la Persona.
+% Restricciones: la evidencia debe estar registrada mediante evidencia/3 y corresponde/2.
+% Objetivo: relacionar evidencias encontradas en el lugar del evento con una persona investigada.
+
+evidencia_en_evento(Persona, LugarEvento, Evidencia, HoraEvidencia) :-
+    evidencia(Evidencia, LugarEvento, HoraEvidencia),
+    hora_valida(HoraEvidencia),
+    corresponde(Evidencia, Persona).
+
+
+% Entradas: Persona (puede ser variable).
+% Salidas: verdadero si la Persona puede descartarse como posible responsable segun las reglas del caso.
+% Restricciones: debe existir un unico evento y una coartada corroborada; la Persona no debe tener acceso ni presencia en el lugar del evento, evidencia atribuida hallada alli ni contradiccion a la hora del evento.
+% Objetivo: justificar el descarte mediante testimonios, movimientos, accesos, evidencias y contradicciones relevantes.
+
+descartar(Persona) :-
+    persona(Persona),
+    evento_central(_, LugarEvento, HoraEvento),
+    hora_valida(HoraEvento),
+    tiene_coartada(Persona),
+    \+ tiene_acceso(Persona, LugarEvento),
+    \+ estuvo(Persona, LugarEvento, HoraEvento),
+    \+ evidencia_en_evento(Persona, LugarEvento, _, _),
+    \+ contradiccion_de(Persona, HoraEvento, _, _).
+
+
 % Entradas: Nombre, Lugar y Hora (pueden ser variables).
 % Salidas: verdadero si el caso contiene exactamente un evento, unificando sus datos.
 % Restricciones: falla si el caso no tiene eventos o tiene mas de uno.

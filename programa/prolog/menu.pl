@@ -261,7 +261,8 @@ mostrar_persona(Persona) :-
     mostrar_testimonios(Persona),
     mostrar_contradicciones_persona(Persona),
     mostrar_evidencias_persona(Persona),
-    mostrar_coartada_persona(Persona).
+    mostrar_coartada_persona(Persona),
+    mostrar_evaluacion_persona(Persona).
 
 
 % Entradas: Persona definida en persona/1.
@@ -347,6 +348,55 @@ mostrar_coartada_persona(Persona) :-
                [LugarTestimonio, TextoHora])
     ;   writeln('      posible coartada: no se pudo establecer con la informacion disponible')
     ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (texto en consola).
+% Restricciones: la clasificacion se basa en los predicados posible_sospechoso/1 y descartar/1.
+% Objetivo: presentar la evaluacion logica de una persona y los indicios que la sustentan.
+
+mostrar_evaluacion_persona(Persona) :-
+    (   posible_sospechoso(Persona)
+    ->  evento_central(_, LugarEvento, HoraEvento),
+        writeln('      evaluacion: posible sospechoso (segun los indicios disponibles)'),
+        mostrar_indicios_sospecha(Persona, LugarEvento, HoraEvento)
+    ;   descartar(Persona)
+    ->  writeln('      evaluacion: descartado como posible responsable segun las reglas del caso'),
+        writeln('        fundamento: coartada corroborada y sin acceso, presencia, evidencia en la escena ni contradiccion a la hora del evento')
+    ;   writeln('      evaluacion: informacion insuficiente para sospechar o descartar')
+    ).
+
+
+% Entradas: Persona, Lugar y Hora del evento.
+% Salidas: ninguna (texto en consola).
+% Restricciones: la Persona debe cumplir posible_sospechoso/1.
+% Objetivo: mostrar los accesos e indicios del evento que fundamentan la sospecha.
+
+mostrar_indicios_sospecha(Persona, LugarEvento, HoraEvento) :-
+    format('        acceso al lugar del evento: ~w~n', [LugarEvento]),
+    findall(HoraEvento,
+            estuvo(Persona, LugarEvento, HoraEvento),
+            Movimientos),
+    sort(Movimientos, MovimientosOrdenados),
+    forall(member(HoraMovimiento, MovimientosOrdenados),
+           ( formato_hora(HoraMovimiento, TextoMovimiento),
+             format('        movimiento en la escena a las ~w~n', [TextoMovimiento]) )),
+    findall(HoraEvidencia-Evidencia,
+            evidencia_en_evento(Persona, LugarEvento, Evidencia, HoraEvidencia),
+            Evidencias),
+    sort(Evidencias, EvidenciasOrdenadas),
+    forall(member(HoraEvidencia-Evidencia, EvidenciasOrdenadas),
+           ( formato_hora(HoraEvidencia, TextoEvidencia),
+             format('        evidencia relacionada: ~w, hallada a las ~w~n',
+                    [Evidencia, TextoEvidencia]) )),
+    findall(LugarTestimonio-LugarMovimiento,
+            contradiccion_de(Persona, HoraEvento, LugarTestimonio, LugarMovimiento),
+            Contradicciones),
+    sort(Contradicciones, ContradiccionesOrdenadas),
+    forall(member(LugarTestimonio-LugarMovimiento, ContradiccionesOrdenadas),
+           ( formato_hora(HoraEvento, TextoHora),
+             format('        contradiccion a las ~w: declara ~w, pero el movimiento indica ~w~n',
+                    [TextoHora, LugarTestimonio, LugarMovimiento]) )).
 
 
 % Entradas: Hora en formato HHMM.
