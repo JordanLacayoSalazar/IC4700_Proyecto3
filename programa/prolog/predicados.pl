@@ -123,6 +123,19 @@ descartar(Persona) :-
     \+ contradiccion_de(Persona, HoraEvento, _, _).
 
 
+% Entradas: Una variable para la lista de posibles responsables.
+% Salidas: Lista ordenada sin duplicados de las personas que cumplen posible_sospechoso/1.
+% Restricciones: solo se consideran personas definidas mediante persona/1; la lista puede estar vacia.
+% Objetivo: reunir las personas que cumplen las condiciones logicas establecidas para ser posibles responsables.
+
+posibles_responsables(Lista) :-
+    findall(Persona,
+            ( persona(Persona),
+              posible_sospechoso(Persona) ),
+            ListaPersonas),
+    sort(ListaPersonas, Lista).
+
+
 % Entradas: Nombre, Lugar y Hora (pueden ser variables).
 % Salidas: verdadero si el caso contiene exactamente un evento, unificando sus datos.
 % Restricciones: falla si el caso no tiene eventos o tiene mas de uno.

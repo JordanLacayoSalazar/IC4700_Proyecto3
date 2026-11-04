@@ -480,14 +480,57 @@ mostrar_evidencia(Evidencia, Lugar, Hora) :-
     format('  - ~w en ~w a las ~w (~w)~n', [Evidencia, Lugar, TextoHora, TextoPersonas]).
 
 
-% opcion_investigar, opcion_posibles_responsables, opcion_explicaciones, opcion_resolver_caso
+% opcion_explicaciones, opcion_resolver_caso
 % Entradas: ninguna.
 % Salidas: ninguna (texto en consola).
-% Restricciones: se completan conforme se implementan los predicados de juego en predicados.pl.
+% Restricciones: las opciones pendientes se completan conforme se implementan sus predicados de juego.
 % Objetivo: atender cada opcion del menu principal.
 
-opcion_investigar            :- pendiente.
-opcion_posibles_responsables :- pendiente.
+opcion_investigar :-
+    nl,
+    writeln('Investigacion individual:'),
+    leer_consulta('la persona', Persona),
+    (   Persona == fin_entrada
+    ->  writeln('Investigacion cancelada por fin de entrada.')
+    ;   investigar(Persona)
+    ).
+
+
+% Entradas: Persona indicada para la investigacion.
+% Salidas: ninguna (muestra la informacion relevante disponible de la Persona).
+% Restricciones: Persona debe ser un atomo definido mediante persona/1.
+% Objetivo: reunir y presentar en una consulta los movimientos, accesos, evidencias, coartadas, contradicciones e indicios de la Persona.
+
+investigar(Persona) :-
+    atom(Persona),
+    persona(Persona), !,
+    nl,
+    format('Investigacion de ~w:~n', [Persona]),
+    mostrar_persona(Persona).
+investigar(Persona) :-
+    atom(Persona), !,
+    format('La persona ~w no esta registrada en el caso.~n', [Persona]).
+investigar(_) :-
+    writeln('La persona debe indicarse mediante un atomo.').
+
+
+% Entradas: ninguna.
+% Salidas: ninguna (muestra la lista de posibles responsables).
+% Restricciones: la lista se obtiene mediante posibles_responsables/1; una lista vacia indica que ningun tripulante cumple las condiciones.
+% Objetivo: presentar las personas que cumplen las reglas de sospecha del caso.
+
+opcion_posibles_responsables :-
+    posibles_responsables(Lista),
+    nl,
+    writeln('Posibles responsables segun los indicios del caso:'),
+    (   Lista == []
+    ->  writeln('  Ningun tripulante cumple las condiciones de sospecha.')
+    ;   forall(member(Persona, Lista),
+               format('  - ~w~n', [Persona])),
+        writeln('La clasificacion indica posibles responsables, no una conclusion de culpabilidad.')
+    ).
+
+
 opcion_explicaciones         :- pendiente.
 opcion_resolver_caso         :- pendiente.
 
