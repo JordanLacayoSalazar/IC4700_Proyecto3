@@ -6,32 +6,33 @@
 :- dynamic ubicado/2, accesoPorObjeto/2, evidencia/3, corresponde/2, testimonio/3.
 
 
-% Entradas: Hora (numero).
-% Salidas: verdadero si la Hora respeta el formato HHMM.
-% Restricciones: las horas deben estar entre 00 y 23 y los minutos entre 00 y 59.
-% Objetivo: validar que una hora del caso o digitada por el usuario tenga el formato HHMM.
-
-hora_valida(Hora) :-
-    integer(Hora),
-    Horas is Hora // 100,
-    Minutos is Hora mod 100,
-    Horas >= 0, Horas =< 23,
-    Minutos >= 0, Minutos =< 59.
-
-
 % Entradas: Persona, Lugar, Inicio y Fin (pueden ser variables).
 % Salidas: verdadero si la Persona estuvo en el Lugar dentro del intervalo indicado.
 % Restricciones: Inicio y Fin deben ser horas validas en formato HHMM y el intervalo es inclusivo; Inicio no puede ser mayor que Fin.
 % Objetivo: consultar los movimientos de una persona registrados durante un intervalo de tiempo.
 
 estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
+    estuvo(Persona, Lugar, Hora),
+    hora_en_intervalo(Hora, Inicio, Fin).
+
+
+% Entradas: Hora, Inicio y Fin en formato HHMM.
+% Salidas: verdadero si Hora cae dentro del intervalo inclusivo, incluso si cruza medianoche.
+% Restricciones: las tres horas deben ser validas.
+% Objetivo: comparar horas usando minutos transcurridos desde medianoche.
+hora_en_intervalo(Hora, Inicio, Fin) :-
+    hora_valida(Hora),
     hora_valida(Inicio),
     hora_valida(Fin),
-    Inicio =< Fin,
-    estuvo(Persona, Lugar, Hora),
-    hora_valida(Hora),
-    Hora >= Inicio,
-    Hora =< Fin.
+    hora_a_minutos(Hora, HoraMinutos),
+    hora_a_minutos(Inicio, InicioMinutos),
+    hora_a_minutos(Fin, FinMinutos),
+    (   InicioMinutos =< FinMinutos
+    ->  HoraMinutos >= InicioMinutos,
+        HoraMinutos =< FinMinutos
+    ;   HoraMinutos >= InicioMinutos
+    ;   HoraMinutos =< FinMinutos
+    ).
 
 
 % Entradas: Persona y una variable para la lista de evidencias.
@@ -80,9 +81,39 @@ contradiccion_de(Persona, Hora, LugarTestimonio, LugarMovimiento) :-
     LugarTestimonio \= LugarMovimiento.
 
 
+% Entradas: Persona, LugarEvento, HoraEvento, HoraContradiccion, LugarTestimonio y LugarMovimiento (pueden ser variables).
+% Salidas: verdadero si la Persona tiene acceso al lugar del evento y se contradice dentro de los 30 minutos
+%          anteriores o posteriores, ubicandose en el evento solo en su testimonio o en los movimientos registrados.
+% Restricciones: debe existir un unico evento; la hora del evento debe ser valida; el lugar del evento debe estar definido en lugar/2; la Persona debe estar definida mediante persona/1.
+% Objetivo: identificar contradicciones que hacen que una persona sea considerada sospechosa.
+
+contradiccion_sospechosa_de(Persona, LugarEvento, HoraEvento, HoraContradiccion, LugarTestimonio, LugarMovimiento) :-
+    tiene_acceso(Persona, LugarEvento),
+    rango_horas_alrededor_evento(HoraEvento, 30, 30, HoraInicio, HoraFin),
+    contradiccion_de(Persona, HoraContradiccion, LugarTestimonio, LugarMovimiento),
+    (   LugarTestimonio = LugarEvento
+    ;   LugarMovimiento = LugarEvento
+    ),
+    hora_en_intervalo(HoraContradiccion, HoraInicio, HoraFin).
+
+
+% Entradas: Persona, LugarEvento, HoraEvento, HoraContradiccion, LugarTestimonio y LugarMovimiento (pueden ser variables).
+% Salidas: verdadero si la Persona tiene acceso al lugar del evento y se contradice dentro de los 30 minutos
+%          anteriores o posteriores, con ambos lugares fuera del lugar del evento.
+% Restricciones: Persona debe estar definida mediante persona/1 y los lugares del testimonio y movimiento deben ser distintos entre sí y del lugar del evento.
+% Objetivo: identificar contradicciones relacionadas temporalmente con el evento que no cumplen el criterio de sospechoso por lugar.
+
+contradiccion_relevante_de(Persona, LugarEvento, HoraEvento, HoraContradiccion, LugarTestimonio, LugarMovimiento) :-
+    rango_horas_alrededor_evento(HoraEvento, 30, 30, HoraInicio, HoraFin),
+    contradiccion_de(Persona, HoraContradiccion, LugarTestimonio, LugarMovimiento),
+    LugarTestimonio \= LugarEvento,
+    LugarMovimiento \= LugarEvento,
+    hora_en_intervalo(HoraContradiccion, HoraInicio, HoraFin).
+
+
 % Entradas: Persona (puede ser variable).
 % Salidas: verdadero si la Persona tiene acceso al lugar del evento y al menos un indicio relacionado con este.
-% Restricciones: debe existir un unico evento; el indicio debe ser presencia en el lugar a la hora del evento, evidencia atribuida hallada en ese lugar o contradiccion a la hora del evento.
+% Restricciones: debe existir un unico evento; el indicio debe ser presencia en el lugar a la hora del evento, evidencia atribuida hallada en ese lugar o una contradiccion dentro de los 30 minutos anteriores o posteriores en la que el testimonio o el movimiento ubique a la Persona en el lugar del evento.
 % Objetivo: inferir posibles sospechosos mediante la combinacion de accesos, movimientos, evidencias y contradicciones relevantes.
 
 posible_sospechoso(Persona) :-
@@ -92,7 +123,7 @@ posible_sospechoso(Persona) :-
     tiene_acceso(Persona, LugarEvento),
     once((  estuvo(Persona, LugarEvento, HoraEvento)
          ;  evidencia_en_evento(Persona, LugarEvento, _, _)
-         ;  contradiccion_de(Persona, HoraEvento, _, _)
+         ;  contradiccion_sospechosa_de(Persona, LugarEvento, HoraEvento, _, _, _)
          )).
 
 
@@ -109,7 +140,7 @@ evidencia_en_evento(Persona, LugarEvento, Evidencia, HoraEvidencia) :-
 
 % Entradas: Persona (puede ser variable).
 % Salidas: verdadero si la Persona puede descartarse como posible responsable segun las reglas del caso.
-% Restricciones: debe existir un unico evento y una coartada corroborada; la Persona no debe tener acceso ni presencia en el lugar del evento, evidencia atribuida hallada alli ni contradiccion a la hora del evento.
+% Restricciones: debe existir un unico evento y una coartada corroborada; la Persona no debe tener acceso ni presencia en el lugar del evento, evidencia atribuida hallada alli ni contradicciones en sus declaraciones.
 % Objetivo: justificar el descarte mediante testimonios, movimientos, accesos, evidencias y contradicciones relevantes.
 
 descartar(Persona) :-
@@ -120,7 +151,7 @@ descartar(Persona) :-
     \+ tiene_acceso(Persona, LugarEvento),
     \+ estuvo(Persona, LugarEvento, HoraEvento),
     \+ evidencia_en_evento(Persona, LugarEvento, _, _),
-    \+ contradiccion_de(Persona, HoraEvento, _, _).
+    \+ tiene_contradiccion(Persona).
 
 
 % Entradas: Una variable para la lista de posibles responsables.
@@ -180,3 +211,187 @@ tiene_acceso(Persona, Lugar) :-
 tiene_acceso(Persona, Lugar) :-
     acceso_mediante_objeto(Persona, Lugar, _),
     \+ acceso(Persona, Lugar).
+
+
+% Entradas: Persona y Explicacion (pueden ser variables).
+% Salidas: verdadero si se puede generar una explicacion.
+% Restricciones: la Persona debe estar definida mediante persona/1; la Explicacion será una cadena de texto.
+% Objetivo: generar una explicacion que permita justificar por qué una persona puede ser considerada sospechosa, descartada o relevante.
+
+% Explicacion de sospechoso: presencia y evidencias
+% Es sospechoso si tiene acceso al lugar del evento y: estuvo alli a la hora del evento o tiene evidencias relacionadas o presenta contradicciones sospechosas en sus declaraciones.
+explicaciones(Persona, Explicacion) :-
+    posible_sospechoso(Persona),
+    evento_central(_, LugarEvento, HoraEvento),
+
+    findall(Hora,
+        estuvo(Persona, LugarEvento, HoraEvento),
+        Movimientos),
+
+    findall(Hora,
+        testimonio(Persona, LugarEvento, HoraEvento),
+        Testimonios),
+
+    findall(Evidencia,
+        evidencia_en_evento(Persona, LugarEvento, Evidencia, _),
+        Evidencias),
+
+    findall(contradiccion(Hora, LugarTestimonio, LugarMovimiento),
+        contradiccion_sospechosa_de(
+            Persona, LugarEvento, HoraEvento, Hora,
+            LugarTestimonio, LugarMovimiento),
+        Contradicciones),
+
+    movimiento_explicacion(Movimientos, TextoMovimientos),
+    testimonio_explicacion(Testimonios, TextoTestimonios),
+    evidencia_explicacion(Evidencias, TextoEvidencias),
+    contradiccion_explicacion(Contradicciones, TextoContradicciones),
+
+    detalles_en_lista(
+        [TextoMovimientos, TextoTestimonios, TextoEvidencias,
+         TextoContradicciones],
+        Detalles),
+
+    format(string(Explicacion),
+        "~w es un(a) posible sospechoso(a) porque tenia acceso a ~w y presenta los siguientes indicios:~n~w",
+        [Persona, LugarEvento, Detalles]).
+
+% Explicacion de descarte
+% Se descarta si tiene una coartada corroborada y no tiene acceso al lugar del evento, no estuvo alli a la hora del evento, no tiene evidencias relacionadas y no presenta contradicciones en sus declaraciones.
+explicaciones(Persona, Explicacion) :-
+    descartar(Persona),
+    evento_central(_, LugarEvento, HoraEvento),
+    formato_hora(HoraEvento, TextoHora),
+    format(string(Explicacion),
+        "~w fue descartado porque tiene una coartada, no tiene acceso al lugar del evento (~w), no existen registros de que estuviera alli a las ~w, no hay evidencias que lo relacionen con el evento y no presenta contradicciones en sus declaraciones.",
+        [Persona, LugarEvento, TextoHora]).
+
+% Explicacion de relevante
+% Es relevante si no es sospechoso ni descartado, pero tiene algun indicio relacionado con el lugar del evento o se contradice pero no de forma sospechosa.
+explicaciones(Persona, Explicacion) :-
+    persona(Persona),
+    \+ posible_sospechoso(Persona),
+    \+ descartar(Persona),
+    evento_central(_, LugarEvento, HoraEvento),
+
+    findall(Hora,
+        estuvo(Persona, LugarEvento, Hora),
+        Movimientos),
+
+    findall(Hora,
+        testimonio(Persona, LugarEvento, Hora),
+        Testimonios),
+
+    findall(Evidencia,
+        evidencia_en_evento(Persona, LugarEvento, Evidencia, _),
+        Evidencias),
+
+    findall(contradiccion(Hora, LugarTestimonio, LugarMovimiento),
+        contradiccion_relevante_de(
+            Persona, LugarEvento, HoraEvento, Hora,
+            LugarTestimonio, LugarMovimiento),
+        Contradicciones),
+
+    (Movimientos \= []; Testimonios \= []; Evidencias \= []; Contradicciones \= []),
+
+    movimiento_explicacion(Movimientos, TextoMovimientos),
+    testimonio_explicacion(Testimonios, TextoTestimonios),
+    evidencia_explicacion(Evidencias, TextoEvidencias),
+    contradiccion_explicacion(Contradicciones, TextoContradicciones),
+    (   tiene_acceso(Persona, LugarEvento)
+    ->  format(string(TextoAccesoLugar),
+            "Tiene acceso al lugar del evento (~w).",
+            [LugarEvento])
+    ;   TextoAccesoLugar = ""
+    ),
+
+    detalles_en_lista(
+        [TextoAccesoLugar, TextoMovimientos, TextoTestimonios,
+         TextoEvidencias, TextoContradicciones],
+        Detalles),
+
+    format(string(Explicacion),
+        "~w es relevante para la investigacion por los siguientes indicios:~n~w",
+        [Persona, Detalles]).
+
+
+% Entradas: Contradicciones y Texto (pueden ser variables).
+% Salidas: verdadero si se puede generar una explicacion de las contradicciones.
+% Restricciones: la lista de contradicciones puede estar vacia; el Texto sera una cadena de texto.
+% Objetivo: generar una explicacion de las contradicciones encontradas en las declaraciones de una persona, indicando la hora y los lugares involucrados.
+
+contradiccion_explicacion([], "").
+contradiccion_explicacion(Contradicciones, Texto) :-
+    Contradicciones \= [],
+    findall(Frase,
+        (member(contradiccion(Hora, LugarTestimonio, LugarMovimiento),
+                Contradicciones),
+         formato_hora(Hora, HoraTexto),
+         format(string(Frase),
+            "Habia declarado estar en ~w a las ~w, pero los registros indican que estaba en ~w.",
+            [LugarTestimonio, HoraTexto, LugarMovimiento])),
+        Frases),
+    atomic_list_concat(Frases, ' ', Texto).
+
+
+% Entradas: Evidencias y Texto (pueden ser variables).
+% Salidas: verdadero si se puede generar una explicacion de las evidencias.
+% Restricciones: la lista de evidencias puede estar vacia; el Texto sera una cadena de texto.
+% Objetivo: generar una explicacion que permita justificar la relacion de una persona con las evidencias encontradas en el lugar del evento.
+
+evidencia_explicacion([], "").
+evidencia_explicacion(Evidencias, Texto) :-
+    Evidencias \= [],
+    atomic_list_concat(Evidencias, ', ', ListaEvidencias),
+    format(string(Texto),
+        "Esta relacionado(a) con estas evidencias: ~w.",
+        [ListaEvidencias]).
+
+
+% Entradas: Testimonios y Texto (pueden ser variables).
+% Salidas: verdadero si se puede generar una explicacion de los testimonios.
+% Restricciones: la lista de testimonios puede estar vacia; el Texto sera una cadena de texto.
+% Objetivo: generar una explicacion de los testimonios que dio sobre su ubicacion en el lugar del evento.
+
+testimonio_explicacion([], "").
+testimonio_explicacion(Horas, Texto) :-
+    Horas \= [],
+    maplist(formato_hora, Horas, HorasTexto),
+    atomic_list_concat(HorasTexto, ', ', ListaHoras),
+    format(string(Texto),
+        "Habia declarado que estuvo en el lugar del evento a las ~w.",
+        [ListaHoras]).
+
+
+% Entradas: Movimientos y Texto (pueden ser variables).
+% Salidas: verdadero si se puede generar una explicacion de los movimientos.
+% Restricciones: la lista de movimientos puede estar vacia; el Texto sera una cadena de texto.
+% Objetivo: generar una explicacion de los movimientos registrados en el lugar del evento.
+
+movimiento_explicacion([], "").
+movimiento_explicacion(Horas, Texto) :-
+    Horas \= [],
+    maplist(formato_hora, Horas, HorasTexto),
+    atomic_list_concat(HorasTexto, ', ', ListaHoras),
+    format(string(Texto),
+        "Los registros indican que estuvo en el lugar del evento a las ~w.",
+        [ListaHoras]).
+
+
+% Entradas: una variable para el resultado de la resolucion.
+% Salidas: error_evento, error_hora(Hora) o caso_resuelto(NombreEvento, LugarEvento, HoraEvento, Personas).
+% Restricciones: solo se infieren responsables si existe un unico evento central con hora valida.
+% Objetivo: obtener mediante inferencia logica el estado del caso y la lista de posibles responsables, sin presentar texto.
+
+resolver_caso(Resultado) :-
+    (   evento_central(NombreEvento, LugarEvento, HoraEvento)
+    ->  (   hora_valida(HoraEvento)
+        ->  findall(Persona,
+                    posible_sospechoso(Persona),
+                    PersonasSinOrdenar),
+            sort(PersonasSinOrdenar, Personas),
+            Resultado = caso_resuelto(NombreEvento, LugarEvento, HoraEvento, Personas)
+        ;   Resultado = error_hora(HoraEvento)
+        )
+    ;   Resultado = error_evento
+    ).

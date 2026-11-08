@@ -178,7 +178,7 @@ opcion_consultar_intervalo :-
         ;   Movimientos = []
         ),
         msort(Movimientos, Ordenados),
-        mostrar_movimientos_intervalo(Persona, Lugar, Ordenados)
+        mostrar_movimientos_persona_intervalo(Persona, Lugar, Ordenados)
     ).
 
 
@@ -201,30 +201,14 @@ leer_consulta(Texto, Termino) :-
 % Restricciones: las horas se presentan en orden ascendente.
 % Objetivo: mostrar los movimientos encontrados para una consulta por intervalo.
 
-mostrar_movimientos_intervalo(_, _, []) :-
+mostrar_movimientos_persona_intervalo(_, _, []) :-
     writeln('No hay movimientos registrados para esa persona, lugar e intervalo.').
-mostrar_movimientos_intervalo(Persona, Lugar, Horas) :-
+mostrar_movimientos_persona_intervalo(Persona, Lugar, Horas) :-
     writeln('Movimientos encontrados:'),
     forall(member(Hora, Horas),
            ( formato_hora(Hora, TextoHora),
              format('  ~w estuvo en ~w a las ~w.~n',
                     [Persona, Lugar, TextoHora]) )).
-
-
-% Entradas: ninguna.
-% Salidas: ninguna (texto en consola).
-% Restricciones: si no hay evento o hay mas de uno se indica en el texto.
-% Objetivo: mostrar el evento central del caso con su lugar y hora.
-
-mostrar_evento :-
-    writeln('Evento central:'),
-    (   evento_central(Nombre, Lugar, Hora)
-    ->  formato_hora(Hora, Texto),
-        format('  ~w en ~w a las ~w~n', [Nombre, Lugar, Texto])
-    ;   evento(_, _, _)
-    ->  writeln('  El caso tiene mas de un evento; debe existir un unico evento central.')
-    ;   writeln('  No hay evento registrado.')
-    ).
 
 
 % Entradas: ninguna.
@@ -257,8 +241,8 @@ mostrar_persona(Persona) :-
     forall(( acceso_mediante_objeto(Persona, LugarObjeto, Objeto),
              \+ acceso(Persona, LugarObjeto) ),
            format('      acceso mediante objeto: ~w (con ~w)~n', [LugarObjeto, Objeto])),
-    mostrar_movimientos(Persona),
-    mostrar_testimonios(Persona),
+    mostrar_movimientos_persona(Persona),
+    mostrar_testimonios_persona(Persona),
     mostrar_contradicciones_persona(Persona),
     mostrar_evidencias_persona(Persona),
     mostrar_coartada_persona(Persona),
@@ -270,7 +254,7 @@ mostrar_persona(Persona) :-
 % Restricciones: si la persona no tiene movimientos registrados se indica en el texto.
 % Objetivo: mostrar los movimientos de una persona segun estuvo/3, ordenados por hora.
 
-mostrar_movimientos(Persona) :-
+mostrar_movimientos_persona(Persona) :-
     findall(Hora-Lugar, estuvo(Persona, Lugar, Hora), Movimientos),
     msort(Movimientos, Ordenados),
     (   Ordenados == []
@@ -278,7 +262,7 @@ mostrar_movimientos(Persona) :-
     ;   writeln('      movimientos:'),
         forall(member(Hora-Lugar, Ordenados),
                ( formato_hora(Hora, Texto),
-                 format('        ~w  ~w~n', [Texto, Lugar]) ))
+                 format('        ~w en ~w~n', [Texto, Lugar]) ))
     ).
 
 
@@ -287,7 +271,7 @@ mostrar_movimientos(Persona) :-
 % Restricciones: si la persona no tiene testimonios registrados se indica en el texto.
 % Objetivo: mostrar los testimonios de una persona segun testimonio/3, ordenados por hora.
 
-mostrar_testimonios(Persona) :-
+mostrar_testimonios_persona(Persona) :-
     findall(Hora-Lugar, testimonio(Persona, Lugar, Hora), Testimonios),
     msort(Testimonios, Ordenados),
     (   Ordenados == []
@@ -399,17 +383,6 @@ mostrar_indicios_sospecha(Persona, LugarEvento, HoraEvento) :-
                     [TextoHora, LugarTestimonio, LugarMovimiento]) )).
 
 
-% Entradas: Hora en formato HHMM.
-% Salidas: Texto con la hora en formato HH:MM.
-% Restricciones: Hora debe ser un entero.
-% Objetivo: presentar una hora HHMM de forma legible.
-
-formato_hora(Hora, Texto) :-
-    Horas is Hora // 100,
-    Minutos is Hora mod 100,
-    format(atom(Texto), '~|~`0t~d~2+:~|~`0t~d~2+', [Horas, Minutos]).
-
-
 % Entradas: ninguna.
 % Salidas: ninguna (texto en consola).
 % Restricciones: ninguna.
@@ -480,11 +453,10 @@ mostrar_evidencia(Evidencia, Lugar, Hora) :-
     format('  - ~w en ~w a las ~w (~w)~n', [Evidencia, Lugar, TextoHora, TextoPersonas]).
 
 
-% opcion_explicaciones, opcion_resolver_caso
-% Entradas: ninguna.
-% Salidas: ninguna (texto en consola).
-% Restricciones: las opciones pendientes se completan conforme se implementan sus predicados de juego.
-% Objetivo: atender cada opcion del menu principal.
+% Entradas: ninguna (lee la Persona desde la consola).
+% Salidas: ninguna (inicia la investigacion individual o informa su cancelacion).
+% Restricciones: la Persona debe indicarse como un atomo registrado; investigar/1 valida el dato.
+% Objetivo: solicitar la Persona que se desea investigar y mostrar su informacion.
 
 opcion_investigar :-
     nl,
@@ -525,20 +497,157 @@ opcion_posibles_responsables :-
     writeln('Posibles responsables segun los indicios del caso:'),
     (   Lista == []
     ->  writeln('  Ningun tripulante cumple las condiciones de sospecha.')
-    ;   forall(member(Persona, Lista),
-               format('  - ~w~n', [Persona])),
+    ;   mostrar_elementos_lista(Lista),
         writeln('La clasificacion indica posibles responsables, no una conclusion de culpabilidad.')
     ).
 
 
-opcion_explicaciones         :- pendiente.
-opcion_resolver_caso         :- pendiente.
+% Entradas: ninguna (lee la Persona desde la consola).
+% Salidas: ninguna (muestra una explicacion del caso para la persona).
+% Restricciones: la persona debe estar registrada en persona/1.
+% Objetivo: pedir el nombre de la persona y generar una explicacion logica de su papel en el caso.
+
+opcion_explicaciones :-
+    nl,
+    writeln('Generar explicaciones para una persona:'),
+    leer_consulta('la persona', Persona),
+    (   Persona == fin_entrada
+    ->  writeln('Generacion de explicaciones cancelada por fin de entrada.')
+    ;   \+ atom(Persona)
+    ->  writeln('La persona debe ser un atomo.')
+    ;   \+ persona(Persona)
+    ->  writeln('La persona no esta registrada en el caso.')
+    ;   findall(Explicacion,
+                explicaciones(Persona, Explicacion),
+                Explicaciones),
+        (   Explicaciones == []
+        ->  format('No hay explicaciones disponibles para ~w.~n', [Persona])
+        ;   format('~nExplicaciones para ~w:~n', [Persona]),
+            forall(member(Explicacion, Explicaciones),
+                format('~w~n', [Explicacion]))
+        )
+    ).
+
 
 
 % Entradas: ninguna.
-% Salidas: ninguna (texto en consola).
-% Restricciones: ninguna.
-% Objetivo: indicar que una funcionalidad aun no esta disponible.
+% Salidas: ninguna (resuelve el caso y muestra el resultado).
+% Restricciones: la resolucion requiere exactamente un evento central con una hora valida.
+% Objetivo: resolver el caso y presentar su resultado.
 
-pendiente :-
-    writeln('Funcionalidad en desarrollo.').
+opcion_resolver_caso :-
+    resolver_caso(Resultado),
+    mostrar_caso_resuelto(Resultado).
+
+
+% Entradas: Resultado devuelto por resolver_caso/1.
+% Salidas: ninguna (muestra el resultado o el motivo por el que no se pudo resolver).
+% Restricciones: Resultado debe ser error_evento, error_hora(Hora) o caso_resuelto/4.
+% Objetivo: presentar el resumen de la resolucion del caso.
+
+mostrar_caso_resuelto(error_evento) :-
+    nl,
+    writeln('No se puede resolver el caso: debe existir exactamente un evento central.').
+mostrar_caso_resuelto(error_hora(HoraEvento)) :-
+    nl,
+    format('No se puede resolver el caso: la hora del evento (~w) no es valida.~n',
+           [HoraEvento]).
+mostrar_caso_resuelto(caso_resuelto(_, LugarEvento, HoraEvento, Personas)) :-
+    nl,
+    writeln('=================== Resolucion logica del caso ==================='),
+    writeln('             (no es una determinacion de culpabilidad)'),
+    mostrar_evento,
+    nl,
+    mostrar_conclusion_caso(Personas, LugarEvento, HoraEvento).
+
+
+% Entradas: lista de Personas inferidas como posibles responsables, LugarEvento y HoraEvento.
+% Salidas: ninguna (muestra la conclusion y los informes de las personas inferidas).
+% Restricciones: Personas puede ser una lista vacia.
+% Objetivo: presentar las personas consideradas responsables segun las reglas del caso.
+
+mostrar_conclusion_caso([], _, _) :-
+    writeln('No se infirieron posibles responsables.').
+mostrar_conclusion_caso(Personas, LugarEvento, HoraEvento) :-
+    Personas \= [],
+    length(Personas, Cantidad),
+    writeln('1. PERSONAS CONSIDERADAS RESPONSABLES:'),
+    format('Se infirieron ~w posibles responsables del evento central:~n', Cantidad),
+    mostrar_elementos_lista(Personas),
+    forall(member(Persona, Personas),
+           mostrar_posible_responsable(Persona, LugarEvento, HoraEvento)).
+
+
+% Entradas: Persona considerada posible responsable, LugarEvento y HoraEvento.
+% Salidas: ninguna (muestra el informe individual de la Persona).
+% Restricciones: Persona debe pertenecer a la lista inferida por resolver_caso/1.
+% Objetivo: presentar evidencias, movimientos, testimonios, accesos, coartadas, contradicciones y justificacion de la Persona.
+
+mostrar_posible_responsable(Persona, LugarEvento, HoraEvento) :-
+    nl,
+    format('------- Informe de ~w -------~n', [Persona]),
+    writeln('2. EVIDENCIAS RELACIONADAS:'),
+    mostrar_evidencias_persona_lugar(Persona, LugarEvento),
+    writeln('3. UBICACIONES Y MOVIMIENTOS RELEVANTES:'),
+    mostrar_movimientos_persona(Persona),
+    writeln('   Testimonios registrados:'),
+    mostrar_testimonios_persona(Persona),
+    writeln('4. ACCESOS RELEVANTES:'),
+    mostrar_acceso_persona_lugar(Persona, LugarEvento),
+    writeln('5. POSIBLES COARTADAS O CONTRADICCIONES:'),
+    mostrar_coartada_persona(Persona),
+    mostrar_contradicciones_persona(Persona),
+    writeln('6. JUSTIFICACION LOGICA DE LA CONCLUSION:'),
+    mostrar_justificacion_responsable(Persona).
+
+
+% Entradas: Persona y LugarEvento.
+% Salidas: ninguna (muestra el tipo de acceso que tiene la Persona al lugar).
+% Restricciones: el acceso puede ser directo o inferido mediante un objeto.
+% Objetivo: presentar el tipo de acceso que tiene la Persona al lugar del evento, ya sea directo o mediante un objeto.
+
+mostrar_acceso_persona_lugar(Persona, LugarEvento) :-
+    (   acceso(Persona, LugarEvento)
+    ->  format('     Acceso directo a ~w.~n', [LugarEvento])
+    ;   findall(Objeto,
+                acceso_mediante_objeto(Persona, LugarEvento, Objeto),
+                ObjetosSinOrdenar),
+        sort(ObjetosSinOrdenar, Objetos),
+        atomic_list_concat(Objetos, ', ', TextoObjetos),
+        format('     Acceso inferido a ~w mediante ~w.~n',
+               [LugarEvento, TextoObjetos])
+    ).
+
+
+% Entradas: Persona y LugarEvento.
+% Salidas: ninguna (muestra las evidencias del evento atribuidas a la Persona).
+% Restricciones: si no hay evidencias atribuidas, se indica en el texto.
+% Objetivo: listar las evidencias relacionadas con la Persona que fueron halladas en el lugar del evento.
+
+mostrar_evidencias_persona_lugar(Persona, LugarEvento) :-
+    findall(Hora-Evidencia,
+            evidencia_en_evento(Persona, LugarEvento, Evidencia, Hora),
+            EvidenciasSinOrdenar),
+    sort(EvidenciasSinOrdenar, Evidencias),
+    (   Evidencias == []
+    ->  writeln('     Ninguna atribuida a esta persona en la escena.')
+    ;   forall(member(Hora-Evidencia, Evidencias),
+               ( formato_hora(Hora, TextoHora),
+                 format('     - ~w, hallada a las ~w~n', [Evidencia, TextoHora]) ))
+    ).
+
+
+% Entradas: Persona definida en persona/1.
+% Salidas: ninguna (muestra las explicaciones disponibles para la Persona).
+% Restricciones: si no se puede generar ninguna explicacion, se informa al usuario.
+% Objetivo: presentar la justificacion logica de la conclusion para la Persona.
+
+mostrar_justificacion_responsable(Persona) :-
+    findall(Explicacion,
+            explicaciones(Persona, Explicacion),
+            Explicaciones),
+    (   Explicaciones == []
+    ->  writeln('No se pudo generar una justificacion de la conclusion.')
+    ;   forall(member(Explicacion, Explicaciones),
+           format('~w~n', [Explicacion]))
+    ).
