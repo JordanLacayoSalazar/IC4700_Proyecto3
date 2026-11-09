@@ -261,8 +261,8 @@ mostrar_movimientos_persona(Persona) :-
     ->  writeln('      movimientos: ninguno registrado')
     ;   writeln('      movimientos:'),
         forall(member(Hora-Lugar, Ordenados),
-               ( formato_hora(Hora, Texto),
-                 format('        ~w en ~w~n', [Texto, Lugar]) ))
+               ( formato_hora(Hora, TextoHora),
+                 format('        ~w en ~w~n', [TextoHora, Lugar]) ))
     ).
 
 
@@ -278,8 +278,8 @@ mostrar_testimonios_persona(Persona) :-
     ->  writeln('      testimonios: ninguno registrado')
     ;   writeln('      testimonios:'),
         forall(member(Hora-Lugar, Ordenados),
-               ( formato_hora(Hora, Texto),
-                 format('        ~w  dice que estuvo en ~w~n', [Texto, Lugar]) ))
+               ( formato_hora(Hora, TextoHora),
+                 format('        ~w  dice que estuvo en ~w~n', [TextoHora, Lugar]) ))
     ).
 
 
@@ -651,15 +651,3 @@ mostrar_justificacion_responsable(Persona) :-
     ;   forall(member(Explicacion, Explicaciones),
            format('~w~n', [Explicacion]))
     ).
-
-
-% Entradas: ninguna.
-% Salidas: cantidad de personas en la primera linea y sus nombres en las siguientes.
-% Restricciones: ninguna.
-% Objetivo: exponer la consulta de personas en un formato legible por el backend.
-
-opcion_consultar_personas :-
-    findall(Persona, persona(Persona), Personas),
-    length(Personas, Cantidad),
-    writeln(Cantidad),
-    forall(member(Persona, Personas), writeln(Persona)).

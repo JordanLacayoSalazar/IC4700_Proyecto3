@@ -326,10 +326,10 @@ contradiccion_explicacion(Contradicciones, Texto) :-
     findall(Frase,
         (member(contradiccion(Hora, LugarTestimonio, LugarMovimiento),
                 Contradicciones),
-         formato_hora(Hora, HoraTexto),
+         formato_hora(Hora, TextoHora),
          format(string(Frase),
             "Habia declarado estar en ~w a las ~w, pero los registros indican que estaba en ~w.",
-            [LugarTestimonio, HoraTexto, LugarMovimiento])),
+            [LugarTestimonio, TextoHora, LugarMovimiento])),
         Frases),
     atomic_list_concat(Frases, ' ', Texto).
 
@@ -354,10 +354,10 @@ evidencia_explicacion(Evidencias, Texto) :-
 % Objetivo: generar una explicacion de los testimonios que dio sobre su ubicacion en el lugar del evento.
 
 testimonio_explicacion([], "").
-testimonio_explicacion(Horas, Texto) :-
+testimonio_explicacion(Hora, Texto) :-
     Horas \= [],
-    maplist(formato_hora, Horas, HorasTexto),
-    atomic_list_concat(HorasTexto, ', ', ListaHoras),
+    maplist(formato_hora, Horas, TextoHoras),
+    atomic_list_concat(TextoHoras, ', ', ListaHoras),
     format(string(Texto),
         "Habia declarado que estuvo en el lugar del evento a las ~w.",
         [ListaHoras]).
@@ -371,8 +371,8 @@ testimonio_explicacion(Horas, Texto) :-
 movimiento_explicacion([], "").
 movimiento_explicacion(Horas, Texto) :-
     Horas \= [],
-    maplist(formato_hora, Horas, HorasTexto),
-    atomic_list_concat(HorasTexto, ', ', ListaHoras),
+    maplist(formato_hora, Horas, TextoHoras),
+    atomic_list_concat(TextoHoras, ', ', ListaHoras),
     format(string(Texto),
         "Los registros indican que estuvo en el lugar del evento a las ~w.",
         [ListaHoras]).

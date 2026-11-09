@@ -5,7 +5,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #000;
+  background: black;
 }
 
 .imagen-rol {
@@ -214,17 +214,11 @@
   min-width: 0;
 }
 
-.titulo-resultado {
-  margin: 0 0 24px;
-  color: #fff;
-  font-size: 32px;
-}
-
 .estado-consulta {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #fff;
+  color: white;
 }
 
 .lista-personas {
@@ -255,7 +249,7 @@
 
 .nombre-persona {
   overflow-wrap: anywhere;
-  color: #fff;
+  color: white;
   font-family: 'VCR OSD Mono', monospace;
   font-size: 22px;
   text-transform: capitalize;
@@ -263,12 +257,102 @@
 
 .error-personas,
 .mensaje-personas {
-  color: #fff;
+  color: white;
   font-size: 18px;
 }
 
 .error-personas {
   color: #ffb4ab;
+}
+
+.lista-lugares {
+  display: grid;
+  gap: 16px;
+}
+
+.tarjeta-lugar {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #ffffff36;
+  border-radius: 8px;
+  background: #171e27;
+}
+
+.nombre-lugar {
+  margin: 0 0 8px;
+  color: white;
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 24px;
+  text-transform: capitalize;
+}
+
+.descripcion-lugar {
+  margin-bottom: 16px;
+  color: #d3d5d9;
+  font-size: 16px;
+}
+
+.detalles-accesos-lugar {
+  border-top: 1px solid #ffffff24;
+}
+
+.detalles-accesos-lugar summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  color: white;
+  cursor: pointer;
+  font-family: 'Brook', sans-serif;
+  font-size: 18px;
+  list-style: none;
+}
+
+.detalles-accesos-lugar summary::-webkit-details-marker {
+  display: none;
+}
+
+.detalles-accesos-lugar summary svg {
+  flex: 0 0 auto;
+  transition: transform 160ms ease;
+}
+
+.detalles-accesos-lugar[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.lista-accesos-lugar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.persona-con-acceso {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #ffffff24;
+  border-radius: 6px;
+  background: #0b1017;
+}
+
+.persona-con-acceso .icono-persona {
+  width: 48px;
+  height: 48px;
+  flex-basis: 48px;
+}
+
+.persona-con-acceso .nombre-persona {
+  font-size: 17px;
+}
+
+.mensaje-accesos-lugar {
+  padding: 12px 0;
+  color: #d3d5d9;
 }
 
 .texto-resultado {
@@ -297,10 +381,10 @@
   gap: 24px;
 }
 
-.titulo-resultado {
-  margin: 0;
-  color: #fff;
-  font-size: 32px;
+.menu-principal .cabecera-resultado .titulo-resultado.MuiTypography-root {
+  margin: 0 0 24px;
+  color: white;
+  font-size: 48px;
   text-align: center;
 }
 
@@ -342,7 +426,7 @@
 .nombre-evento {
   overflow-wrap: anywhere;
   margin: 0;
-  color: #fff;
+  color: white;
   font-family: 'Impostograph', sans-serif;
   font-size: 88px;
   font-weight: normal;
@@ -388,16 +472,80 @@
   right: 14px;
   max-width: calc(100% - 28px);
   overflow-wrap: anywhere;
-  color: #ffffffd9;
-  font-size: 17px;
+  color: white;
+  font-size: 24px;
   text-align: right;
+}
+
+.detalles-objeto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dato-objeto {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ffffff24;
+  border-radius: 6px;
+  background: #ffffff0a;
+}
+
+.dato-objeto h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--color-texto-secundario);
+  font-size: 16px;
+}
+
+.dato-objeto h4 svg {
+  flex: 0 0 auto;
+}
+
+.dato-objeto p {
+  margin: 0;
+  color: white;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.descripcion-evidencia {
+  margin-bottom: 16px;
+  color: var(--color-texto-secundario);
+  font-size: 16px;
+}
+
+.subcuadro-evidencia {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ffffff24;
+  border-radius: 6px;
+  background: #ffffff0a;
+}
+
+.subcuadro-evidencia h4 {
+  margin: 0 0 8px;
+  color: var(--color-texto-secundario);
+  font-size: 16px;
+}
+
+.subcuadro-evidencia > p {
+  margin: 0;
+  color: white;
+  font-size: 16px;
+}
+
+.subcuadro-evidencia .lista-accesos-lugar {
+  padding-top: 0;
 }
 
 .enlace-detalles {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #ffffffc7;
+  color: var(--color-texto-secundario);
   font-size: 17px;
 }
 
@@ -408,191 +556,4 @@
 
 .menu-principal .MuiButton-root.boton-resumen:hover {
   filter: brightness(1.18);
-}
-
-@media (max-width: 1100px) and (min-width: 761px) {
-  .menu-principal {
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .cuerpo-menu-principal {
-    grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
-  }
-
-  .menu-opciones-lateral {
-    padding: 36px 24px;
-  }
-
-  .cabecera-menu {
-    padding: 16px 32px;
-  }
-
-  .contenido-caso {
-    padding: 32px;
-  }
-
-  .texto-resultado {
-    max-height: 65vh;
-    padding: 20px;
-    font-size: 14px;
-  }
-
-  .tarjeta-persona {
-    gap: 12px;
-    padding: 12px;
-  }
-
-  .icono-persona {
-    width: 64px;
-    height: 64px;
-    flex-basis: 64px;
-  }
-
-  .nombre-persona {
-    font-size: 18px;
-  }
-
-  .titulo-resultado {
-    font-size: 26px;
-  }
-
-  .menu-principal .MuiButton-root.boton-opcion,
-  .menu-principal .MuiButton-root.boton-resumen {
-    font-size: 20px;
-  }
-
-  .enlace-detalles {
-    font-size: 15px;
-  }
-
-  .nombre-evento {
-    font-size: 64px;
-  }
-}
-
-@media (max-width: 760px) {
-  .menu-principal {
-    height: auto;
-    min-height: 100vh;
-    overflow: visible;
-    grid-template-rows: auto auto;
-  }
-
-  .cuerpo-menu-principal {
-    overflow: visible;
-    grid-template-columns: 1fr;
-  }
-
-  .menu-opciones-lateral {
-    height: auto;
-    max-height: 60vh;
-    padding: 32px 24px;
-    border-right: 0;
-    border-bottom: 1px solid #ffffff1a;
-  }
-
-  .panel-caso {
-    min-height: 480px;
-    overflow: hidden;
-    padding: 0;
-  }
-
-  .panel-datos-base {
-    overflow: auto;
-  }
-
-  .panel-animado {
-    position: absolute;
-    height: 100%;
-  }
-
-  .cabecera-menu {
-    padding: 20px 24px;
-  }
-
-  .contenido-caso {
-    padding: 28px 24px 36px;
-  }
-
-  .titulo-resultado {
-    font-size: 26px;
-  }
-
-  .texto-resultado {
-    max-height: none;
-    padding: 16px;
-  }
-
-  .lista-personas {
-    grid-template-columns: 1fr;
-  }
-
-  .marco-detective-resultado {
-    width: 100px;
-    height: 100px;
-    flex-basis: 100px;
-  }
-
-  .nombre-evento {
-    margin-bottom: 72px;
-    font-size: 56px;
-  }
-}
-
-@media (max-width: 480px) {
-  .cabecera-menu {
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .titulo-menu {
-    font-size: 20px;
-  }
-
-  .marca-menu {
-    gap: 10px;
-  }
-
-  .imagen-detective-menu {
-    width: 48px;
-    height: 48px;
-    flex-basis: 48px;
-  }
-
-  .menu-principal .MuiButton-root.boton-salir {
-    padding: 10px 12px;
-    font-size: 16px;
-  }
-
-  .contenido-caso {
-    padding: 24px 16px 32px;
-  }
-
-  .titulo-resultado {
-    font-size: 22px;
-  }
-
-  .cabecera-resultado {
-    gap: 12px;
-  }
-
-  .titulo-resultado {
-    font-size: 20px;
-  }
-
-  .marco-detective-resultado {
-    width: 76px;
-    height: 76px;
-    flex-basis: 76px;
-  }
-
-  .resumen-caso {
-    grid-template-columns: 1fr;
-  }
-
-  .nombre-evento {
-    margin-bottom: 64px;
-    font-size: 44px;
-  }
 }

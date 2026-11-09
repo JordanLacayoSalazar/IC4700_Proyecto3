@@ -16,10 +16,16 @@ import detectiveImg from '../assets/detective-1.png'
 import detectiveResultadoImg from '../assets/detective-2.png'
 import {
   consultarInformacionCaso,
-  consultarPersonasCaso,
-} from '../api/caso.api.js'
+  consultarEvidenciasCaso,
+  consultarLugaresCaso,
+  consultarObjetosCaso,
+} from '../api/investigacion.api.js'
+import { consultarPersonasCaso } from '../api/personas.api.js'
 import PanelDatos from './panelDatos.jsx'
 import ResultadoConsulta from './resultadoConsultaTexto.jsx'
+import ResultadoEvidencias from './resultadoEvidencias.jsx'
+import ResultadoLugares from './resultadoLugares.jsx'
+import ResultadoObjetos from './resultadoObjetos.jsx'
 import ResultadoPersonas from './resultadoPersonas.jsx'
 import './menuPrincipal.css'
 
@@ -48,6 +54,18 @@ function MenuPrincipal({ datosCaso, onSalir }) {
   const [datosPersonas, setDatosPersonas] = useState(null)
   const [cargandoPersonas, setCargandoPersonas] = useState(true)
   const [errorPersonas, setErrorPersonas] = useState('')
+  const [lugares, setLugares] = useState([])
+  const [cantidadLugares, setCantidadLugares] = useState(null)
+  const [cargandoLugares, setCargandoLugares] = useState(true)
+  const [errorLugares, setErrorLugares] = useState('')
+  const [objetos, setObjetos] = useState([])
+  const [cantidadObjetos, setCantidadObjetos] = useState(null)
+  const [cargandoObjetos, setCargandoObjetos] = useState(true)
+  const [errorObjetos, setErrorObjetos] = useState('')
+  const [evidencias, setEvidencias] = useState([])
+  const [cantidadEvidencias, setCantidadEvidencias] = useState(null)
+  const [cargandoEvidencias, setCargandoEvidencias] = useState(true)
+  const [errorEvidencias, setErrorEvidencias] = useState('')
 
   /**
    * Entradas: ninguna.
@@ -93,6 +111,114 @@ function MenuPrincipal({ datosCaso, onSalir }) {
   }
 
   useEffect(iniciarCargaPersonas, [])
+
+  /**
+   * Entradas: ninguna.
+   * Salidas: carga cantidad y lugares desde el backend y entrega la función de limpieza.
+   * Restricciones: actualiza el estado solo mientras el menú permanece montado.
+   * Objetivo: mostrar la cantidad de lugares en el resumen y reutilizar el resultado al abrirlo.
+   */
+  function iniciarCargaLugares() {
+    let estaMenuMontado = true
+
+    async function cargarLugares() {
+      try {
+        const resultado = await consultarLugaresCaso()
+        if (estaMenuMontado) {
+          setCantidadLugares(resultado.cantidad)
+          setLugares(resultado.lugares)
+        }
+      } catch (error) {
+        if (estaMenuMontado) {
+          setErrorLugares(
+            error instanceof Error ? error.message : 'Ocurrió un error al consultar los lugares.',
+          )
+        }
+      } finally {
+        if (estaMenuMontado) setCargandoLugares(false)
+      }
+    }
+
+    cargarLugares()
+
+    return function limpiarCargaLugares() {
+      estaMenuMontado = false
+    }
+  }
+
+  useEffect(iniciarCargaLugares, [])
+
+  /**
+   * Entradas: ninguna.
+   * Salidas: carga el conteo y el detalle de objetos y entrega la función de limpieza.
+   * Restricciones: actualiza el estado solo mientras el menú permanece montado.
+   * Objetivo: mostrar el conteo de objetos en el resumen y preparar su detalle.
+   */
+  function iniciarCargaObjetos() {
+    let estaMenuMontado = true
+
+    async function cargarObjetos() {
+      try {
+        const resultado = await consultarObjetosCaso()
+        if (estaMenuMontado) {
+          setCantidadObjetos(resultado.cantidad)
+          setObjetos(resultado.objetos)
+        }
+      } catch (error) {
+        if (estaMenuMontado) {
+          setErrorObjetos(
+            error instanceof Error ? error.message : 'Ocurrió un error al consultar los objetos.',
+          )
+        }
+      } finally {
+        if (estaMenuMontado) setCargandoObjetos(false)
+      }
+    }
+
+    cargarObjetos()
+
+    return function limpiarCargaObjetos() {
+      estaMenuMontado = false
+    }
+  }
+
+  useEffect(iniciarCargaObjetos, [])
+
+  /**
+   * Entradas: ninguna.
+   * Salidas: carga el conteo y el detalle de evidencias y entrega la función de limpieza.
+   * Restricciones: actualiza el estado solo mientras el menú permanece montado.
+   * Objetivo: obtener las evidencias del backend para el resumen y su vista gráfica.
+   */
+  function iniciarCargaEvidencias() {
+    let estaMenuMontado = true
+
+    async function cargarEvidencias() {
+      try {
+        const resultado = await consultarEvidenciasCaso()
+        if (estaMenuMontado) {
+          setCantidadEvidencias(resultado.cantidad)
+          setEvidencias(resultado.evidencias)
+        }
+      } catch (error) {
+        if (estaMenuMontado) {
+          setErrorEvidencias(
+            error instanceof Error ? error.message : 'Ocurrió un error al consultar las evidencias.',
+          )
+        }
+      } finally {
+        if (estaMenuMontado) setCargandoEvidencias(false)
+      }
+    }
+
+    cargarEvidencias()
+
+    return function limpiarCargaEvidencias() {
+      estaMenuMontado = false
+    }
+  }
+
+  useEffect(iniciarCargaEvidencias, [])
 
   /**
    * Entradas: índice de la opción seleccionada en opcionesMenu.
@@ -152,6 +278,16 @@ function MenuPrincipal({ datosCaso, onSalir }) {
 
   /**
    * Entradas: ninguna.
+   * Salidas: abre el resultado de lugares y actualiza sus datos, carga o error.
+   * Restricciones: requiere que el backend exponga la consulta de lugares en Prolog.
+   * Objetivo: cargar los lugares y sus personas con acceso al seleccionar Ver detalles.
+   */
+  function mostrarLugares() {
+    setTipoResultado('lugares')
+  }
+
+  /**
+   * Entradas: ninguna.
    * Salidas: oculta la capa de resultado y restaura el panel de datos.
    * Restricciones: ninguna.
    * Objetivo: regresar desde un resultado al panel de datos del caso.
@@ -197,7 +333,13 @@ function MenuPrincipal({ datosCaso, onSalir }) {
             <PanelDatos
               datosCaso={datosCaso}
               cantidadPersonas={datosPersonas?.cantidad}
+              cantidadLugares={cantidadLugares}
+              cantidadObjetos={cantidadObjetos}
+              cantidadEvidencias={cantidadEvidencias}
               onVerPersonas={mostrarPersonas}
+              onVerLugares={mostrarLugares}
+              onVerObjetos={() => setTipoResultado('objetos')}
+              onVerEvidencias={() => setTipoResultado('evidencias')}
             />
           </Box>
           <AnimatePresence>
@@ -220,8 +362,16 @@ function MenuPrincipal({ datosCaso, onSalir }) {
                     >
                       Volver
                     </Button>
-                    <Typography component="h2" className="titulo-resultado">
-                      {tipoResultado === 'personas' ? 'Personas del caso' : 'Información del caso'}
+                    <Typography component="h2" variant="h3" className="titulo-resultado">
+                      {tipoResultado === 'personas'
+                        ? 'Personas del caso'
+                        : tipoResultado === 'lugares'
+                          ? 'Lugares y accesos'
+                          : tipoResultado === 'objetos'
+                            ? 'Objetos'
+                            : tipoResultado === 'evidencias'
+                              ? 'Evidencias'
+                          : 'Información del caso'}
                     </Typography>
                     <Box className="marco-detective-resultado">
                       <Box
@@ -238,6 +388,28 @@ function MenuPrincipal({ datosCaso, onSalir }) {
                       personas={datosPersonas.personas}
                       cargando={cargandoPersonas}
                       error={errorPersonas}
+                    />
+                  ) : tipoResultado === 'lugares' ? (
+                    <ResultadoLugares
+                      lugares={lugares}
+                      cargandoLugares={cargandoLugares}
+                      cargandoPersonas={cargandoPersonas}
+                      errorLugares={errorLugares}
+                      errorPersonas={errorPersonas}
+                    />
+                  ) : tipoResultado === 'objetos' ? (
+                    <ResultadoObjetos
+                      cantidad={cantidadObjetos}
+                      objetos={objetos}
+                      cargando={cargandoObjetos}
+                      error={errorObjetos}
+                    />
+                  ) : tipoResultado === 'evidencias' ? (
+                    <ResultadoEvidencias
+                      cantidad={cantidadEvidencias}
+                      evidencias={evidencias}
+                      cargando={cargandoEvidencias}
+                      error={errorEvidencias}
                     />
                   ) : (
                     <ResultadoConsulta

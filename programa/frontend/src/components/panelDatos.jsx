@@ -2,13 +2,12 @@ import { Box, Button, Typography } from '@mui/material'
 import { OpenInNewOutlined } from '@mui/icons-material'
 
 const resumenCaso = [
-  { clave: 'personas', etiqueta: 'Personas', color: 1 },
-  { clave: 'lugares', etiqueta: 'Lugares', color: 2 },
+  { clave: 'personas', etiqueta: 'Personas involucradas', color: 1 },
+  { clave: 'lugares', etiqueta: 'Lugares y accesos', color: 2 },
   { clave: 'objetos', etiqueta: 'Objetos', color: 3 },
   { clave: 'evidencias', etiqueta: 'Evidencias', color: 4 },
   { clave: 'movimientos', etiqueta: 'Movimientos', color: 5 },
   { clave: 'testimonios', etiqueta: 'Testimonios', color: 6 },
-  { clave: 'accesos', etiqueta: 'Accesos', color: 7 },
 ]
 
 /**
@@ -35,17 +34,27 @@ function obtenerNombreEvento(evento) {
 }
 
 /**
- * Entradas: datosCaso opcionales, cantidadPersonas recibida del backend y callback onVerPersonas.
+ * Entradas: datosCaso opcionales, cantidades de personas y lugares y callbacks de detalle.
  * Salidas: JSX con el evento central y tarjetas resumen de las categorías del caso.
  * Restricciones: muestra "No disponible" para conteos ausentes o inválidos; solo la tarjeta
  * Personas ejecuta onVerPersonas.
  * Objetivo: presentar el resumen del caso y permitir abrir el detalle de personas.
  */
-function PanelDatos({ datosCaso, cantidadPersonas, onVerPersonas }) {
+function PanelDatos({
+  datosCaso,
+  cantidadPersonas,
+  cantidadLugares,
+  cantidadObjetos,
+  cantidadEvidencias,
+  onVerPersonas,
+  onVerLugares,
+  onVerObjetos,
+  onVerEvidencias,
+}) {
   /**
    * Entradas: configuración de una categoría del resumen.
    * Salidas: botón JSX con etiqueta, cantidad e indicador para ver detalles.
-   * Restricciones: solo la categoría personas recibe el callback onVerPersonas.
+   * Restricciones: personas y lugares reciben el callback de detalle correspondiente.
    * Objetivo: renderizar una tarjeta del resumen del caso.
    */
   function renderizarResumen({ clave, etiqueta, color }) {
@@ -53,13 +62,29 @@ function PanelDatos({ datosCaso, cantidadPersonas, onVerPersonas }) {
       <Button
         className={`boton-resumen color-boton-${color}`}
         key={clave}
-        onClick={clave === 'personas' ? onVerPersonas : undefined}
+        onClick={
+          clave === 'personas'
+            ? onVerPersonas
+            : clave === 'lugares'
+              ? onVerLugares
+              : clave === 'objetos'
+                ? onVerObjetos
+                : clave === 'evidencias'
+                  ? onVerEvidencias
+              : undefined
+        }
         type="button"
       >
         <span className="texto-resumen">{etiqueta}</span>
         <span className="cantidad-resumen">
           {clave === 'personas'
             ? mostrarCantidad(cantidadPersonas)
+            : clave === 'lugares'
+              ? mostrarCantidad(cantidadLugares)
+              : clave === 'objetos'
+                ? mostrarCantidad(cantidadObjetos)
+                : clave === 'evidencias'
+                  ? mostrarCantidad(cantidadEvidencias)
             : mostrarCantidad(datosCaso?.[clave])}
         </span>
         <span className="enlace-detalles">

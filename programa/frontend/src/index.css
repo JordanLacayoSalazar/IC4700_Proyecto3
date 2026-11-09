@@ -37,7 +37,7 @@
 :root {
   background: #070b13;
   color: white;
-  --subtitulo-color: #ffffffc2;
+  --color-texto-secundario: #ffffff9b;
   --color-boton-base: #20232a;
   --color-boton-hover: #30343d;
   --color-borde-boton: white;
