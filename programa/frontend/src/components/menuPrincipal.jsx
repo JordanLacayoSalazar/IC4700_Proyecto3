@@ -1,16 +1,26 @@
+import { useEffect, useState } from 'react'
 import {
   AccessTimeOutlined,
+  ArrowBackOutlined,
   GroupsOutlined,
   InfoOutlined,
   LightbulbOutlined,
   LogoutOutlined,
-  OpenInNewOutlined,
   PersonSearchOutlined,
   GavelOutlined,
   HistoryToggleOffOutlined,
 } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/material'
+import { AnimatePresence, motion } from 'motion/react'
 import detectiveImg from '../assets/detective-1.png'
+import detectiveResultadoImg from '../assets/detective-2.png'
+import {
+  consultarInformacionCaso,
+  consultarPersonasCaso,
+} from '../api/caso.api.js'
+import PanelDatos from './panelDatos.jsx'
+import ResultadoConsulta from './resultadoConsultaTexto.jsx'
+import ResultadoPersonas from './resultadoPersonas.jsx'
 import './menuPrincipal.css'
 
 const opcionesMenu = [
@@ -23,29 +33,133 @@ const opcionesMenu = [
   { texto: 'Consultar movimientos por intervalo', icono: HistoryToggleOffOutlined },
 ]
 
-const resumenCaso = [
-  { clave: 'personas', etiqueta: 'Personas', color: 1 },
-  { clave: 'lugares', etiqueta: 'Lugares', color: 2 },
-  { clave: 'objetos', etiqueta: 'Objetos', color: 3 },
-  { clave: 'evidencias', etiqueta: 'Evidencias', color: 4 },
-  { clave: 'movimientos', etiqueta: 'Movimientos', color: 5 },
-  { clave: 'testimonios', etiqueta: 'Testimonios', color: 6 },
-  { clave: 'accesos', etiqueta: 'Accesos', color: 7 },
-]
-
-function mostrarCantidad(valor) {
-  if (Array.isArray(valor)) return valor.length
-  if (Number.isInteger(valor) && valor >= 0) return valor
-  return 'No disponible'
-}
-
-function obtenerNombreEvento(evento) {
-  if (typeof evento === 'string') return evento
-  if (evento && typeof evento.nombre === 'string') return evento.nombre
-  return 'No disponible'
-}
-
+/**
+ * Entradas: datosCaso opcionales y función onSalir del componente padre.
+ * Salidas: JSX del menú principal y panel de resultados.
+ * Restricciones: la consulta de personas se realiza al montar el menú; la opción indexada 0
+ * abre información del caso y el resumen de personas depende de la respuesta del backend.
+ * Objetivo: coordinar las consultas de la pantalla principal y presentar sus resultados.
+ */
 function MenuPrincipal({ datosCaso, onSalir }) {
+  const [tipoResultado, setTipoResultado] = useState(null)
+  const [textoResultado, setTextoResultado] = useState('')
+  const [cargandoResultado, setCargandoResultado] = useState(false)
+  const [errorResultado, setErrorResultado] = useState('')
+  const [datosPersonas, setDatosPersonas] = useState(null)
+  const [cargandoPersonas, setCargandoPersonas] = useState(true)
+  const [errorPersonas, setErrorPersonas] = useState('')
+
+  /**
+   * Entradas: ninguna.
+   * Salidas: inicia la carga asíncrona de personas y entrega a React la función de limpieza.
+   * Restricciones: se ejecuta una vez al montar el menú; invalida actualizaciones al desmontarlo.
+   * Objetivo: conectar la carga inicial de personas al ciclo de vida del componente.
+   */
+  function iniciarCargaPersonas() {
+    let estaMenuMontado = true
+
+    /**
+     * Entradas: ninguna.
+     * Salidas: actualiza los estados de datos, error y carga con la respuesta de la API.
+     * Restricciones: solo actualiza el componente si sigue montado.
+     * Objetivo: consultar y conservar los datos de personas para el conteo y el detalle.
+     */
+    async function cargarPersonas() {
+      try {
+        const resultado = await consultarPersonasCaso()
+        if (estaMenuMontado) setDatosPersonas(resultado)
+      } catch (error) {
+        if (estaMenuMontado) {
+          setErrorPersonas(
+            error instanceof Error ? error.message : 'Ocurrió un error al consultar las personas.',
+          )
+        }
+      } finally {
+        if (estaMenuMontado) setCargandoPersonas(false)
+      }
+    }
+
+    cargarPersonas()
+
+    /**
+     * Entradas: ninguna.
+     * Salidas: marca como desmontado el menú.
+     * Restricciones: la función se ejecuta al desmontar el componente o limpiar el efecto.
+     * Objetivo: impedir actualizaciones de estado después de desmontar el menú.
+     */
+    return function limpiarCargaPersonas() {
+      estaMenuMontado = false
+    }
+  }
+
+  useEffect(iniciarCargaPersonas, [])
+
+  /**
+   * Entradas: índice de la opción seleccionada en opcionesMenu.
+   * Salidas: abre una vista y actualiza los estados de carga, texto o error de la consulta.
+   * Restricciones: por ahora solo el índice 0 tiene una consulta implementada.
+   * Objetivo: ejecutar la consulta de información del caso seleccionada en el menú lateral.
+   */
+  async function manejarOpcion(indice) {
+    if (indice !== 0) return
+
+    setTipoResultado('informacion')
+    setCargandoResultado(true)
+    setTextoResultado('')
+    setErrorResultado('')
+
+    try {
+      const texto = await consultarInformacionCaso()
+      setTextoResultado(texto)
+    } catch (error) {
+      setErrorResultado(
+        error instanceof Error ? error.message : 'Ocurrió un error al consultar el caso.',
+      )
+    } finally {
+      setCargandoResultado(false)
+    }
+  }
+
+  /**
+   * Entradas: opción con texto e icono e índice en opcionesMenu.
+   * Salidas: botón JSX con su texto, icono, estilo y manejador.
+   * Restricciones: la opción debe contener texto e icono válidos.
+   * Objetivo: representar una opción del menú lateral.
+   */
+  function renderizarOpcion({ texto, icono: Icono }, indice) {
+    return (
+      <Button
+        className={`boton-opcion color-boton-${indice + 1}`}
+        key={texto}
+        onClick={() => manejarOpcion(indice)}
+        startIcon={<Icono />}
+        type="button"
+      >
+        {texto}
+      </Button>
+    )
+  }
+
+  /**
+   * Entradas: ninguna.
+   * Salidas: cambia la vista activa al detalle de personas.
+   * Restricciones: ninguna.
+   * Objetivo: abrir la lista de personas desde la tarjeta del resumen.
+   */
+  function mostrarPersonas() {
+    setTipoResultado('personas')
+  }
+
+  /**
+   * Entradas: ninguna.
+   * Salidas: oculta la capa de resultado y restaura el panel de datos.
+   * Restricciones: ninguna.
+   * Objetivo: regresar desde un resultado al panel de datos del caso.
+   */
+  function volverAlPanelDatos() {
+    setTipoResultado(null)
+  }
+
   return (
     <Box component="main" className="menu-principal">
       <Box className="cabecera-menu">
@@ -74,48 +188,68 @@ function MenuPrincipal({ datosCaso, onSalir }) {
       <Box className="cuerpo-menu-principal">
         <Box component="nav" className="menu-opciones-lateral" aria-label="Opciones de investigación">
           <Box className="lista-opciones">
-            {opcionesMenu.map(({ texto, icono: Icono }, indice) => (
-              <Button
-                className={`boton-opcion color-boton-${indice + 1}`}
-                key={texto}
-                startIcon={<Icono />}
-                type="button"
-              >
-                {texto}
-              </Button>
-            ))}
+            {opcionesMenu.map(renderizarOpcion)}
           </Box>
         </Box>
 
         <Box component="section" className="panel-caso" aria-labelledby="titulo-caso">
-          <Box className="contenido-caso">
-            <Typography className="etiqueta-evento" component="p" variant="overline">
-              Evento central
-            </Typography>
-            <Typography className="nombre-evento" id="titulo-caso" component="h2" variant="h3">
-              {obtenerNombreEvento(datosCaso?.evento)}
-            </Typography>
-
-            <Typography className="titulo-resumen" component="h3" variant="h5">
-              Resumen de hechos registrados
-            </Typography>
-            <Box className="resumen-caso">
-              {resumenCaso.map(({ clave, etiqueta, color }) => (
-                <Button
-                  className={`boton-resumen color-boton-${color}`}
-                  key={clave}
-                  type="button"
-                >
-                  <span className="texto-resumen">{etiqueta}</span>
-                  <span className="cantidad-resumen">{mostrarCantidad(datosCaso?.[clave])}</span>
-                  <span className="enlace-detalles">
-                    <span>Ver detalles</span>
-                    <OpenInNewOutlined aria-hidden="true" />
-                  </span>
-                </Button>
-              ))}
-            </Box>
+          <Box className="panel-datos-base">
+            <PanelDatos
+              datosCaso={datosCaso}
+              cantidadPersonas={datosPersonas?.cantidad}
+              onVerPersonas={mostrarPersonas}
+            />
           </Box>
+          <AnimatePresence>
+            {tipoResultado && (
+              <motion.div
+                className="panel-animado"
+                key="resultado"
+                initial={{ y: '-100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '-100%' }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+              >
+                <Box className="contenido-caso vista-resultado">
+                  <Box className="cabecera-resultado">
+                    <Button
+                      className="boton-volver-resultado"
+                      onClick={volverAlPanelDatos}
+                      startIcon={<ArrowBackOutlined />}
+                      type="button"
+                    >
+                      Volver
+                    </Button>
+                    <Typography component="h2" className="titulo-resultado">
+                      {tipoResultado === 'personas' ? 'Personas del caso' : 'Información del caso'}
+                    </Typography>
+                    <Box className="marco-detective-resultado">
+                      <Box
+                        component="img"
+                        className="imagen-detective-resultado"
+                        src={detectiveResultadoImg}
+                        alt="Detective"
+                      />
+                    </Box>
+                  </Box>
+                  {tipoResultado === 'personas' ? (
+                    <ResultadoPersonas
+                      cantidad={datosPersonas.cantidad}
+                      personas={datosPersonas.personas}
+                      cargando={cargandoPersonas}
+                      error={errorPersonas}
+                    />
+                  ) : (
+                    <ResultadoConsulta
+                      texto={textoResultado}
+                      cargando={cargandoResultado}
+                      error={errorResultado}
+                    />
+                  )}
+                </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Box>
       </Box>
     </Box>

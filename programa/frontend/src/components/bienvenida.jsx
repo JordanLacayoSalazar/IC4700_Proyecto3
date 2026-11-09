@@ -4,6 +4,12 @@ import { motion } from 'motion/react'
 import bienvenidaImg from '../assets/bienvenida.png'
 import './bienvenida.css'
 
+/**
+ * Entradas: propiedad onEmpezar (función que inicia la investigación).
+ * Salidas: JSX de bienvenida con información del proyecto y botón de inicio.
+ * Restricciones: onEmpezar debe ser una función válida para el evento click del botón.
+ * Objetivo: presentar la portada de la aplicación y permitir entrar al menú.
+ */
 function Bienvenida({ onEmpezar }) {
   return (
     <Box component="section" className="pagina-bienvenida" aria-labelledby="titulo-proyecto">
@@ -22,7 +28,7 @@ function Bienvenida({ onEmpezar }) {
         className="contenido-bienvenida"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.55, ease: 'easeOut' }}
+        transition={{ duration: 0.25, delay: 0.55, ease: 'easeOut' }}
       >
         <Typography className="nombre-instituto" variant="h6" component="p">
           Instituto Tecnológico de Costa Rica

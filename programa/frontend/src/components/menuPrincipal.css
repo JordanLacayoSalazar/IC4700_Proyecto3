@@ -1,3 +1,21 @@
+.pantalla-rol {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000;
+}
+
+.imagen-rol {
+  display: block;
+  width: 1024px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .menu-principal {
   display: grid;
   height: 100vh;
@@ -151,15 +169,167 @@
 }
 
 .panel-caso {
+  position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 0;
 }
 
+.panel-datos-base {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 0;
+  overflow: auto;
+}
+
+.panel-animado {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #11161d;
+}
+
 .contenido-caso {
+  min-width: 0;
   padding: 36px 64px 48px;
+}
+
+.vista-resultado {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+}
+
+.resultado-consulta {
+  width: 100%;
+  min-width: 0;
+}
+
+.titulo-resultado {
+  margin: 0 0 24px;
+  color: #fff;
+  font-size: 32px;
+}
+
+.estado-consulta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+}
+
+.lista-personas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.tarjeta-persona {
+  display: flex;
+  min-width: 0;
+  min-height: 112px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid #ffffff36;
+  border-radius: 8px;
+  background: #171e27;
+}
+
+.icono-persona {
+  display: block;
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  object-fit: contain;
+}
+
+.nombre-persona {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 22px;
+  text-transform: capitalize;
+}
+
+.error-personas,
+.mensaje-personas {
+  color: #fff;
+  font-size: 18px;
+}
+
+.error-personas {
+  color: #ffb4ab;
+}
+
+.texto-resultado {
+  width: 680px;
+  max-width: 100%;
+  min-width: 0;
+  max-height: 70vh;
+  overflow-x: auto;
+  overflow-y: auto;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid #ffffff33;
+  border-radius: 8px;
+  background: #0b1017;
+  color: #f4f4f5;
+  font-family: 'Barlow', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.cabecera-resultado {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.titulo-resultado {
+  margin: 0;
+  color: #fff;
+  font-size: 32px;
+  text-align: center;
+}
+
+.marco-detective-resultado {
+  display: grid;
+  width: 132px;
+  height: 132px;
+  flex: 0 0 132px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #ffffff70;
+  border-radius: 6px;
+  background: #ffffff0a;
+}
+
+.imagen-detective-resultado {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.menu-principal .MuiButton-root.boton-volver-resultado {
+  justify-self: start;
+  background: var(--color-boton-salir);
+  font-size: 20px;
+}
+
+.menu-principal .MuiButton-root.boton-volver-resultado:hover {
+  background: var(--color-boton-salir-hover);
 }
 
 .etiqueta-evento {
@@ -171,7 +341,7 @@
 
 .nombre-evento {
   overflow-wrap: anywhere;
-  margin: 0 0 120px;
+  margin: 0;
   color: #fff;
   font-family: 'Impostograph', sans-serif;
   font-size: 88px;
@@ -261,6 +431,31 @@
     padding: 32px;
   }
 
+  .texto-resultado {
+    max-height: 65vh;
+    padding: 20px;
+    font-size: 14px;
+  }
+
+  .tarjeta-persona {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .icono-persona {
+    width: 64px;
+    height: 64px;
+    flex-basis: 64px;
+  }
+
+  .nombre-persona {
+    font-size: 18px;
+  }
+
+  .titulo-resultado {
+    font-size: 26px;
+  }
+
   .menu-principal .MuiButton-root.boton-opcion,
   .menu-principal .MuiButton-root.boton-resumen {
     font-size: 20px;
@@ -297,8 +492,18 @@
   }
 
   .panel-caso {
-    overflow: visible;
+    min-height: 480px;
+    overflow: hidden;
     padding: 0;
+  }
+
+  .panel-datos-base {
+    overflow: auto;
+  }
+
+  .panel-animado {
+    position: absolute;
+    height: 100%;
   }
 
   .cabecera-menu {
@@ -307,6 +512,25 @@
 
   .contenido-caso {
     padding: 28px 24px 36px;
+  }
+
+  .titulo-resultado {
+    font-size: 26px;
+  }
+
+  .texto-resultado {
+    max-height: none;
+    padding: 16px;
+  }
+
+  .lista-personas {
+    grid-template-columns: 1fr;
+  }
+
+  .marco-detective-resultado {
+    width: 100px;
+    height: 100px;
+    flex-basis: 100px;
   }
 
   .nombre-evento {
@@ -343,6 +567,24 @@
 
   .contenido-caso {
     padding: 24px 16px 32px;
+  }
+
+  .titulo-resultado {
+    font-size: 22px;
+  }
+
+  .cabecera-resultado {
+    gap: 12px;
+  }
+
+  .titulo-resultado {
+    font-size: 20px;
+  }
+
+  .marco-detective-resultado {
+    width: 76px;
+    height: 76px;
+    flex-basis: 76px;
   }
 
   .resumen-caso {
