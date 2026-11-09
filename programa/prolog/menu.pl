@@ -552,13 +552,13 @@ mostrar_caso_resuelto(error_hora(HoraEvento)) :-
     nl,
     format('No se puede resolver el caso: la hora del evento (~w) no es valida.~n',
            [HoraEvento]).
-mostrar_caso_resuelto(caso_resuelto(_, LugarEvento, HoraEvento, Personas)) :-
+mostrar_caso_resuelto(caso_resuelto(Personas, LugarEvento)) :-
     nl,
     writeln('=================== Resolucion logica del caso ==================='),
     writeln('             (no es una determinacion de culpabilidad)'),
     mostrar_evento,
     nl,
-    mostrar_conclusion_caso(Personas, LugarEvento, HoraEvento).
+    mostrar_conclusion_caso(Personas, LugarEvento).
 
 
 % Entradas: lista de Personas inferidas como posibles responsables, LugarEvento y HoraEvento.
@@ -568,14 +568,14 @@ mostrar_caso_resuelto(caso_resuelto(_, LugarEvento, HoraEvento, Personas)) :-
 
 mostrar_conclusion_caso([], _, _) :-
     writeln('No se infirieron posibles responsables.').
-mostrar_conclusion_caso(Personas, LugarEvento, HoraEvento) :-
+mostrar_conclusion_caso(Personas, LugarEvento) :-
     Personas \= [],
     length(Personas, Cantidad),
     writeln('1. PERSONAS CONSIDERADAS RESPONSABLES:'),
     format('Se infirieron ~w posibles responsables del evento central:~n', Cantidad),
     mostrar_elementos_lista(Personas),
     forall(member(Persona, Personas),
-           mostrar_posible_responsable(Persona, LugarEvento, HoraEvento)).
+           mostrar_posible_responsable(Persona, LugarEvento)).
 
 
 % Entradas: Persona considerada posible responsable, LugarEvento y HoraEvento.
@@ -583,7 +583,7 @@ mostrar_conclusion_caso(Personas, LugarEvento, HoraEvento) :-
 % Restricciones: Persona debe pertenecer a la lista inferida por resolver_caso/1.
 % Objetivo: presentar evidencias, movimientos, testimonios, accesos, coartadas, contradicciones y justificacion de la Persona.
 
-mostrar_posible_responsable(Persona, LugarEvento, HoraEvento) :-
+mostrar_posible_responsable(Persona, LugarEvento) :-
     nl,
     format('------- Informe de ~w -------~n', [Persona]),
     writeln('2. EVIDENCIAS RELACIONADAS:'),

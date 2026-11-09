@@ -379,18 +379,18 @@ movimiento_explicacion(Horas, Texto) :-
 
 
 % Entradas: una variable para el resultado de la resolucion.
-% Salidas: error_evento, error_hora(Hora) o caso_resuelto(NombreEvento, LugarEvento, HoraEvento, Personas).
+% Salidas: error_evento, error_hora(Hora) o caso_resuelto(Personas, LugarEvento).
 % Restricciones: solo se infieren responsables si existe un unico evento central con hora valida.
 % Objetivo: obtener mediante inferencia logica el estado del caso y la lista de posibles responsables, sin presentar texto.
 
 resolver_caso(Resultado) :-
-    (   evento_central(NombreEvento, LugarEvento, HoraEvento)
+    (   evento_central(_, LugarEvento, HoraEvento)
     ->  (   hora_valida(HoraEvento)
         ->  findall(Persona,
                     posible_sospechoso(Persona),
                     PersonasSinOrdenar),
             sort(PersonasSinOrdenar, Personas),
-            Resultado = caso_resuelto(NombreEvento, LugarEvento, HoraEvento, Personas)
+            Resultado = caso_resuelto(Personas, LugarEvento)
         ;   Resultado = error_hora(HoraEvento)
         )
     ;   Resultado = error_evento

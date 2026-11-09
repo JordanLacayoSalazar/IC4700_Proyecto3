@@ -1,0 +1,356 @@
+.menu-principal {
+  display: grid;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid #515963;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  background: #11161d;
+  color: #f4f4f5;
+  font-family: 'VCR OSD Mono', monospace;
+}
+
+.cabecera-menu {
+  z-index: 2;
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 48px;
+  border-bottom: 1px solid #ffffff24;
+  background: #11161d;
+}
+
+.titulo-menu {
+  margin: 0;
+  font-size: 24px;
+  text-align: left;
+}
+
+.marca-menu {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 16px;
+}
+
+.imagen-detective-menu {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  object-fit: fill;
+}
+
+.menu-principal .MuiButton-root.boton-salir {
+  flex: 0 0 auto;
+  border-color: var(--color-borde-boton);
+  background: var(--color-boton-salir);
+  font-size: 20px;
+}
+
+.menu-principal .MuiButton-root.boton-salir:hover {
+  background: var(--color-boton-salir-hover);
+}
+
+.cuerpo-menu-principal {
+  display: grid;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.menu-opciones-lateral {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 48px 36px;
+  border-right: 1px solid #ffffff1a;
+  background: #171e27;
+}
+
+.menu-opciones-lateral::-webkit-scrollbar,
+.panel-caso::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu-opciones-lateral::-webkit-scrollbar-thumb,
+.panel-caso::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #ffffff55;
+  background-clip: padding-box;
+}
+
+.menu-opciones-lateral::-webkit-scrollbar-track,
+.panel-caso::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lista-opciones {
+  display: grid;
+  gap: 12px;
+}
+
+.menu-principal .MuiButton-root.boton-opcion {
+  display: flex;
+  min-height: 72px;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 12px 16px;
+  border-width: 4px;
+  border-radius: 7px;
+  font-size: 25px;
+  line-height: 1.2;
+  text-align: left;
+  white-space: normal;
+}
+
+.numero-opcion {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 8px;
+  background: #00000029;
+  font-size: 14px;
+}
+
+.menu-principal .MuiButton-root.color-boton-1 {
+  background: var(--color-boton-1) !important;
+}
+
+.menu-principal .MuiButton-root.color-boton-2 {
+  background: var(--color-boton-2) !important;
+}
+
+.menu-principal .MuiButton-root.color-boton-3 {
+  background: var(--color-boton-3) !important;
+}
+
+.menu-principal .MuiButton-root.color-boton-4 {
+  background: var(--color-boton-4) !important;
+}
+
+.menu-principal .MuiButton-root.color-boton-5 {
+  background: var(--color-boton-5) !important;
+}
+
+.menu-principal .MuiButton-root.color-boton-6 {
+  background: var(--color-boton-6) !important;
+}
+
+.menu-principal .MuiButton-root.color-boton-7 {
+  background: var(--color-boton-7) !important;
+}
+
+.menu-principal .MuiButton-root.boton-opcion:hover {
+  filter: brightness(1.18);
+}
+
+.panel-caso {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.contenido-caso {
+  padding: 36px 64px 48px;
+}
+
+.etiqueta-evento {
+  margin-bottom: 12px;
+  color: #b7bbc2;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.nombre-evento {
+  overflow-wrap: anywhere;
+  margin: 0 0 120px;
+  color: #fff;
+  font-family: 'Impostograph', sans-serif;
+  font-size: 88px;
+  font-weight: normal;
+  line-height: 1.1;
+}
+
+.titulo-resumen {
+  margin-bottom: 20px;
+  color: #dedfe2;
+  font-size: 20px;
+}
+
+.resumen-caso {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.menu-principal .MuiButton-root.boton-resumen {
+  position: relative;
+  display: flex;
+  min-height: 132px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 42px 16px 14px;
+  border-width: 4px;
+  border-radius: 7px;
+  font-size: 25px;
+  line-height: 1.2;
+  text-align: left;
+  white-space: normal;
+}
+
+.texto-resumen {
+  overflow-wrap: anywhere;
+}
+
+.cantidad-resumen {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  max-width: calc(100% - 28px);
+  overflow-wrap: anywhere;
+  color: #ffffffd9;
+  font-size: 17px;
+  text-align: right;
+}
+
+.enlace-detalles {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffffc7;
+  font-size: 17px;
+}
+
+.enlace-detalles svg {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-principal .MuiButton-root.boton-resumen:hover {
+  filter: brightness(1.18);
+}
+
+@media (max-width: 1100px) and (min-width: 761px) {
+  .menu-principal {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .cuerpo-menu-principal {
+    grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .menu-opciones-lateral {
+    padding: 36px 24px;
+  }
+
+  .cabecera-menu {
+    padding: 16px 32px;
+  }
+
+  .contenido-caso {
+    padding: 32px;
+  }
+
+  .menu-principal .MuiButton-root.boton-opcion,
+  .menu-principal .MuiButton-root.boton-resumen {
+    font-size: 20px;
+  }
+
+  .enlace-detalles {
+    font-size: 15px;
+  }
+
+  .nombre-evento {
+    font-size: 64px;
+  }
+}
+
+@media (max-width: 760px) {
+  .menu-principal {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    grid-template-rows: auto auto;
+  }
+
+  .cuerpo-menu-principal {
+    overflow: visible;
+    grid-template-columns: 1fr;
+  }
+
+  .menu-opciones-lateral {
+    height: auto;
+    max-height: 60vh;
+    padding: 32px 24px;
+    border-right: 0;
+    border-bottom: 1px solid #ffffff1a;
+  }
+
+  .panel-caso {
+    overflow: visible;
+    padding: 0;
+  }
+
+  .cabecera-menu {
+    padding: 20px 24px;
+  }
+
+  .contenido-caso {
+    padding: 28px 24px 36px;
+  }
+
+  .nombre-evento {
+    margin-bottom: 72px;
+    font-size: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cabecera-menu {
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .titulo-menu {
+    font-size: 20px;
+  }
+
+  .marca-menu {
+    gap: 10px;
+  }
+
+  .imagen-detective-menu {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+
+  .menu-principal .MuiButton-root.boton-salir {
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+
+  .contenido-caso {
+    padding: 24px 16px 32px;
+  }
+
+  .resumen-caso {
+    grid-template-columns: 1fr;
+  }
+
+  .nombre-evento {
+    margin-bottom: 64px;
+    font-size: 44px;
+  }
+}

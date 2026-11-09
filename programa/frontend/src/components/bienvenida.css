@@ -1,0 +1,85 @@
+.pagina-bienvenida {
+  font-family: 'VCR OSD Mono', sans-serif;
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  overflow: hidden;
+  place-items: center;
+  padding: 32px 20px;
+  isolation: isolate;
+}
+
+.fondo-bienvenida,
+.sombra-bienvenida {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fondo-bienvenida {
+  object-fit: cover;
+  object-position: center;
+}
+
+.sombra-bienvenida {
+  background: linear-gradient(180deg, #05080f1f, #05080f7a);
+}
+
+.contenido-bienvenida {
+  width: 800px;
+  text-align: center;
+}
+
+.nombre-instituto,
+.nombre-curso,
+.numero-proyecto {
+  margin: 0;
+}
+
+.nombre-instituto {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: 1px;
+}
+
+.nombre-curso {
+  margin-top: 7px;
+  color: var(--subtitulo-color);
+  font-size: 15px;
+}
+
+.numero-proyecto {
+  color: #f7c95c;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.pagina-bienvenida .MuiTypography-root.titulo-proyecto {
+  font-family: 'Impostograph', sans-serif;
+  font-size: 150px;
+  font-weight: normal;
+  letter-spacing: 2px;
+  line-height: 1.05;
+}
+
+.pagina-bienvenida .MuiButton-root.boton-investigacion {
+  background: var(--color-boton-investigacion);
+  color: white;
+  box-shadow: none;
+}
+
+.pagina-bienvenida .MuiButton-root.boton-investigacion:hover {
+  background: var(--color-boton-investigacion-hover);
+  box-shadow: none;
+}
+
+.seccion-integrantes {
+  margin-bottom: 32px;
+}
+
+.titulo-integrantes {
+  color: var(--subtitulo-color);
+}
