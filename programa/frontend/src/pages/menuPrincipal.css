@@ -125,17 +125,6 @@
   white-space: normal;
 }
 
-.numero-opcion {
-  display: grid;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  place-items: center;
-  border-radius: 8px;
-  background: #00000029;
-  font-size: 14px;
-}
-
 .menu-principal .MuiButton-root.color-boton-1 {
   background: var(--color-boton-1) !important;
 }
@@ -209,171 +198,6 @@
   gap: 24px;
 }
 
-.resultado-consulta {
-  width: 100%;
-  min-width: 0;
-}
-
-.estado-consulta {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: white;
-}
-
-.lista-personas {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.tarjeta-persona {
-  display: flex;
-  min-width: 0;
-  min-height: 112px;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
-  border: 1px solid #ffffff36;
-  border-radius: 8px;
-  background: #171e27;
-}
-
-.icono-persona {
-  display: block;
-  width: 76px;
-  height: 76px;
-  flex: 0 0 76px;
-  object-fit: contain;
-}
-
-.nombre-persona {
-  overflow-wrap: anywhere;
-  color: white;
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 22px;
-  text-transform: capitalize;
-}
-
-.error-personas,
-.mensaje-personas {
-  color: white;
-  font-size: 18px;
-}
-
-.error-personas {
-  color: #ffb4ab;
-}
-
-.lista-lugares {
-  display: grid;
-  gap: 16px;
-}
-
-.tarjeta-lugar {
-  min-width: 0;
-  padding: 20px;
-  border: 1px solid #ffffff36;
-  border-radius: 8px;
-  background: #171e27;
-}
-
-.nombre-lugar {
-  margin: 0 0 8px;
-  color: white;
-  font-family: 'VCR OSD Mono', monospace;
-  font-size: 24px;
-  text-transform: capitalize;
-}
-
-.descripcion-lugar {
-  margin-bottom: 16px;
-  color: #d3d5d9;
-  font-size: 16px;
-}
-
-.detalles-accesos-lugar {
-  border-top: 1px solid #ffffff24;
-}
-
-.detalles-accesos-lugar summary {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  color: white;
-  cursor: pointer;
-  font-family: 'Brook', sans-serif;
-  font-size: 18px;
-  list-style: none;
-}
-
-.detalles-accesos-lugar summary::-webkit-details-marker {
-  display: none;
-}
-
-.detalles-accesos-lugar summary svg {
-  flex: 0 0 auto;
-  transition: transform 160ms ease;
-}
-
-.detalles-accesos-lugar[open] summary svg {
-  transform: rotate(180deg);
-}
-
-.lista-accesos-lugar {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding-top: 12px;
-}
-
-.persona-con-acceso {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border: 1px solid #ffffff24;
-  border-radius: 6px;
-  background: #0b1017;
-}
-
-.persona-con-acceso .icono-persona {
-  width: 48px;
-  height: 48px;
-  flex-basis: 48px;
-}
-
-.persona-con-acceso .nombre-persona {
-  font-size: 17px;
-}
-
-.mensaje-accesos-lugar {
-  padding: 12px 0;
-  color: #d3d5d9;
-}
-
-.texto-resultado {
-  width: 680px;
-  max-width: 100%;
-  min-width: 0;
-  max-height: 70vh;
-  overflow-x: auto;
-  overflow-y: auto;
-  margin: 0;
-  padding: 24px;
-  border: 1px solid #ffffff33;
-  border-radius: 8px;
-  background: #0b1017;
-  color: #f4f4f5;
-  font-family: 'Barlow', sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  white-space: pre;
-}
-
 .cabecera-resultado {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -426,11 +250,13 @@
 .nombre-evento {
   overflow-wrap: anywhere;
   margin: 0;
+  padding-bottom: 40px;
   color: white;
-  font-family: 'Impostograph', sans-serif;
-  font-size: 88px;
+  font-family: 'VCR OSD Mono', monospace;
+  font-size: 40px;
   font-weight: normal;
   line-height: 1.1;
+  white-space: pre-wrap;
 }
 
 .titulo-resumen {
@@ -475,70 +301,6 @@
   color: white;
   font-size: 24px;
   text-align: right;
-}
-
-.detalles-objeto {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.dato-objeto {
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #ffffff24;
-  border-radius: 6px;
-  background: #ffffff0a;
-}
-
-.dato-objeto h4 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 8px;
-  color: var(--color-texto-secundario);
-  font-size: 16px;
-}
-
-.dato-objeto h4 svg {
-  flex: 0 0 auto;
-}
-
-.dato-objeto p {
-  margin: 0;
-  color: white;
-  font-size: 16px;
-  overflow-wrap: anywhere;
-}
-
-.descripcion-evidencia {
-  margin-bottom: 16px;
-  color: var(--color-texto-secundario);
-  font-size: 16px;
-}
-
-.subcuadro-evidencia {
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #ffffff24;
-  border-radius: 6px;
-  background: #ffffff0a;
-}
-
-.subcuadro-evidencia h4 {
-  margin: 0 0 8px;
-  color: var(--color-texto-secundario);
-  font-size: 16px;
-}
-
-.subcuadro-evidencia > p {
-  margin: 0;
-  color: white;
-  font-size: 16px;
-}
-
-.subcuadro-evidencia .lista-accesos-lugar {
-  padding-top: 0;
 }
 
 .enlace-detalles {

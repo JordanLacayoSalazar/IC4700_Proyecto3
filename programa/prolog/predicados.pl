@@ -8,12 +8,35 @@
 
 % Entradas: Persona, Lugar, Inicio y Fin (pueden ser variables).
 % Salidas: verdadero si la Persona estuvo en el Lugar dentro del intervalo indicado.
-% Restricciones: Inicio y Fin deben ser horas validas en formato HHMM y el intervalo es inclusivo; Inicio no puede ser mayor que Fin.
+% Restricciones: Inicio y Fin deben ser horas validas en formato HHMM y el intervalo es inclusivo. Inicio no puede ser mayor que Fin.
 % Objetivo: consultar los movimientos de una persona registrados durante un intervalo de tiempo.
 
 estuvo_en_intervalo(Persona, Lugar, Inicio, Fin) :-
     estuvo(Persona, Lugar, Hora),
     hora_en_intervalo(Hora, Inicio, Fin).
+
+
+% Entradas: Persona, Lugar, Hora y una variable para el resultado.
+% Salidas: Resultado = si o Resultado = no según exista el movimiento exacto.
+% Restricciones: Hora debe ser un entero en formato HHMM.
+% Objetivo: expresar si la persona estuvo en el lugar a la hora indicada.
+
+resultado_estadia(Persona, Lugar, Hora, si) :-
+    estuvo(Persona, Lugar, Hora), !. % Una persona no puede estar en 2 lugares al mismo tiempo.
+resultado_estadia(_, _, _, no).
+
+
+% Entradas: Persona, Lugar, Inicio, Fin y una variable para la lista de horas.
+% Salidas: lista ordenada de las horas registradas dentro del intervalo inclusivo.
+% Restricciones: Inicio y Fin deben ser horas validas.
+% Objetivo: reunir los movimientos que cumplen la consulta.
+
+movimientos_en_intervalo(Persona, Lugar, Inicio, Fin, Movimientos) :-
+    findall(Hora,
+            ( estuvo(Persona, Lugar, Hora),
+              hora_en_intervalo(Hora, Inicio, Fin) ),
+            Horas),
+    msort(Horas, Movimientos).
 
 
 % Entradas: Hora, Inicio y Fin en formato HHMM.
@@ -37,7 +60,7 @@ hora_en_intervalo(Hora, Inicio, Fin) :-
 
 % Entradas: Persona y una variable para la lista de evidencias.
 % Salidas: Lista ordenada sin duplicados de las evidencias relacionadas con la Persona.
-% Restricciones: Persona debe estar definida mediante persona/1; la lista puede estar vacia.
+% Restricciones: Persona debe estar definida mediante persona/1. La lista puede estar vacia.
 % Objetivo: reunir las evidencias asociadas a una persona mediante corresponde/2.
 
 evidencias_de(Persona, Evidencias) :-
@@ -70,7 +93,7 @@ tiene_contradiccion(Persona) :-
 
 % Entradas: Persona, Hora, LugarTestimonio y LugarMovimiento (pueden ser variables).
 % Salidas: una contradiccion encontrada entre el lugar declarado y el lugar registrado para la Persona.
-% Restricciones: Persona debe estar definida mediante persona/1; Hora debe ser valida; los lugares deben ser distintos.
+% Restricciones: Persona debe estar definida mediante persona/1. Hora debe ser valida; los lugares deben ser distintos.
 % Objetivo: identificar y describir una contradiccion entre testimonio/3 y estuvo/3.
 
 contradiccion_de(Persona, Hora, LugarTestimonio, LugarMovimiento) :-
@@ -84,7 +107,7 @@ contradiccion_de(Persona, Hora, LugarTestimonio, LugarMovimiento) :-
 % Entradas: Persona, LugarEvento, HoraEvento, HoraContradiccion, LugarTestimonio y LugarMovimiento (pueden ser variables).
 % Salidas: verdadero si la Persona tiene acceso al lugar del evento y se contradice dentro de los 30 minutos
 %          anteriores o posteriores, ubicandose en el evento solo en su testimonio o en los movimientos registrados.
-% Restricciones: debe existir un unico evento; la hora del evento debe ser valida; el lugar del evento debe estar definido en lugar/2; la Persona debe estar definida mediante persona/1.
+% Restricciones: debe existir un unico evento. La hora del evento debe ser valida. El lugar del evento debe estar definido en lugar/2. La Persona debe estar definida mediante persona/1.
 % Objetivo: identificar contradicciones que hacen que una persona sea considerada sospechosa.
 
 contradiccion_sospechosa_de(Persona, LugarEvento, HoraEvento, HoraContradiccion, LugarTestimonio, LugarMovimiento) :-
@@ -113,7 +136,7 @@ contradiccion_relevante_de(Persona, LugarEvento, HoraEvento, HoraContradiccion, 
 
 % Entradas: Persona (puede ser variable).
 % Salidas: verdadero si la Persona tiene acceso al lugar del evento y al menos un indicio relacionado con este.
-% Restricciones: debe existir un unico evento; el indicio debe ser presencia en el lugar a la hora del evento, evidencia atribuida hallada en ese lugar o una contradiccion dentro de los 30 minutos anteriores o posteriores en la que el testimonio o el movimiento ubique a la Persona en el lugar del evento.
+% Restricciones: debe existir un unico evento. El indicio debe ser presencia en el lugar a la hora del evento, evidencia atribuida hallada en ese lugar o una contradiccion dentro de los 30 minutos anteriores o posteriores en la que el testimonio o el movimiento ubique a la Persona en el lugar del evento.
 % Objetivo: inferir posibles sospechosos mediante la combinacion de accesos, movimientos, evidencias y contradicciones relevantes.
 
 posible_sospechoso(Persona) :-
@@ -156,7 +179,7 @@ descartar(Persona) :-
 
 % Entradas: Una variable para la lista de posibles responsables.
 % Salidas: Lista ordenada sin duplicados de las personas que cumplen posible_sospechoso/1.
-% Restricciones: solo se consideran personas definidas mediante persona/1; la lista puede estar vacia.
+% Restricciones: solo se consideran personas definidas mediante persona/1. La lista puede estar vacia.
 % Objetivo: reunir las personas que cumplen las condiciones logicas establecidas para ser posibles responsables.
 
 posibles_responsables(Lista) :-
@@ -178,7 +201,7 @@ evento_central(Nombre, Lugar, Hora) :-
 
 % Entradas: Persona y Objeto (pueden ser variables).
 % Salidas: verdadero si la Persona puede obtener el Objeto.
-% Restricciones: el objeto debe tener una ubicacion registrada en ubicado/2; la segunda clausula solo aplica sin acceso directo, para no repetir soluciones.
+% Restricciones: el objeto debe tener una ubicacion registrada en ubicado/2. La segunda clausula solo aplica sin acceso directo, para no repetir soluciones.
 % Objetivo: determinar si una persona puede tomar un objeto por tener acceso directo al lugar donde se encontraba o por haber estado registrada alli.
 
 puede_obtener_objeto(Persona, Objeto) :-
@@ -215,7 +238,7 @@ tiene_acceso(Persona, Lugar) :-
 
 % Entradas: Persona y Explicacion (pueden ser variables).
 % Salidas: verdadero si se puede generar una explicacion.
-% Restricciones: la Persona debe estar definida mediante persona/1; la Explicacion será una cadena de texto.
+% Restricciones: la Persona debe estar definida mediante persona/1. La Explicacion será una cadena de texto.
 % Objetivo: generar una explicacion que permita justificar por qué una persona puede ser considerada sospechosa, descartada o relevante.
 
 % Explicacion de sospechoso: presencia y evidencias
@@ -317,7 +340,7 @@ explicaciones(Persona, Explicacion) :-
 
 % Entradas: Contradicciones y Texto (pueden ser variables).
 % Salidas: verdadero si se puede generar una explicacion de las contradicciones.
-% Restricciones: la lista de contradicciones puede estar vacia; el Texto sera una cadena de texto.
+% Restricciones: la lista de contradicciones puede estar vacia. El Texto sera una cadena de texto.
 % Objetivo: generar una explicacion de las contradicciones encontradas en las declaraciones de una persona, indicando la hora y los lugares involucrados.
 
 contradiccion_explicacion([], "").
@@ -336,7 +359,7 @@ contradiccion_explicacion(Contradicciones, Texto) :-
 
 % Entradas: Evidencias y Texto (pueden ser variables).
 % Salidas: verdadero si se puede generar una explicacion de las evidencias.
-% Restricciones: la lista de evidencias puede estar vacia; el Texto sera una cadena de texto.
+% Restricciones: la lista de evidencias puede estar vacia. El Texto sera una cadena de texto.
 % Objetivo: generar una explicacion que permita justificar la relacion de una persona con las evidencias encontradas en el lugar del evento.
 
 evidencia_explicacion([], "").
@@ -350,11 +373,11 @@ evidencia_explicacion(Evidencias, Texto) :-
 
 % Entradas: Testimonios y Texto (pueden ser variables).
 % Salidas: verdadero si se puede generar una explicacion de los testimonios.
-% Restricciones: la lista de testimonios puede estar vacia; el Texto sera una cadena de texto.
+% Restricciones: la lista de testimonios puede estar vacia. El Texto sera una cadena de texto.
 % Objetivo: generar una explicacion de los testimonios que dio sobre su ubicacion en el lugar del evento.
 
 testimonio_explicacion([], "").
-testimonio_explicacion(Hora, Texto) :-
+testimonio_explicacion(Horas, Texto) :-
     Horas \= [],
     maplist(formato_hora, Horas, TextoHoras),
     atomic_list_concat(TextoHoras, ', ', ListaHoras),
@@ -365,7 +388,7 @@ testimonio_explicacion(Hora, Texto) :-
 
 % Entradas: Movimientos y Texto (pueden ser variables).
 % Salidas: verdadero si se puede generar una explicacion de los movimientos.
-% Restricciones: la lista de movimientos puede estar vacia; el Texto sera una cadena de texto.
+% Restricciones: la lista de movimientos puede estar vacia. El Texto sera una cadena de texto.
 % Objetivo: generar una explicacion de los movimientos registrados en el lugar del evento.
 
 movimiento_explicacion([], "").
@@ -381,7 +404,7 @@ movimiento_explicacion(Horas, Texto) :-
 % Entradas: una variable para el resultado de la resolucion.
 % Salidas: error_evento, error_hora(Hora) o caso_resuelto(Personas, LugarEvento).
 % Restricciones: solo se infieren responsables si existe un unico evento central con hora valida.
-% Objetivo: obtener mediante inferencia logica el estado del caso y la lista de posibles responsables, sin presentar texto.
+% Objetivo: obtener mediante inferencia logica el estado del caso y la lista de posibles responsables.
 
 resolver_caso(Resultado) :-
     (   evento_central(_, LugarEvento, HoraEvento)

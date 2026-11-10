@@ -13,79 +13,86 @@ const resumenCaso = [
 /**
  * Entradas: valor que debería contener la cantidad recibida.
  * Salidas: entero no negativo o el texto "No disponible".
- * Restricciones: no calcula cantidades a partir de arreglos; solo acepta enteros no negativos.
+ * Restricciones: solo acepta enteros no negativos.
  * Objetivo: obtener el total recibido desde el backend para mostrarlo en el panel.
  */
-function mostrarCantidad(valor) {
+function mostrarCantidad(valor, cargando) {
+  if (cargando) return 'Consultando...'
   if (Number.isInteger(valor) && valor >= 0) return valor
   return 'No disponible'
 }
 
 /**
- * Entradas: evento como cadena o como objeto con propiedad nombre.
- * Salidas: nombre del evento o "No disponible" si no se recibió uno válido.
- * Restricciones: solo reconoce cadenas y objetos cuyo nombre sea una cadena.
- * Objetivo: obtener el nombre del evento desde el backend para mostrarlo en el panel.
- */
-function obtenerNombreEvento(evento) {
-  if (typeof evento === 'string') return evento
-  if (evento && typeof evento.nombre === 'string') return evento.nombre
-  return 'No disponible'
-}
-
-/**
- * Entradas: datosCaso opcionales, cantidades de personas y lugares y callbacks de detalle.
+ * Entradas: cantidades de registros y callbacks de detalle.
  * Salidas: JSX con el evento central y tarjetas resumen de las categorías del caso.
- * Restricciones: muestra "No disponible" para conteos ausentes o inválidos; solo la tarjeta
- * Personas ejecuta onVerPersonas.
+ * Restricciones: muestra "No disponible" para conteos ausentes o inválidos.
  * Objetivo: presentar el resumen del caso y permitir abrir el detalle de personas.
  */
-function PanelDatos({
-  datosCaso,
+function ResumenHechos({
   cantidadPersonas,
   cantidadLugares,
   cantidadObjetos,
   cantidadEvidencias,
+  cantidadMovimientos,
+  cantidadTestimonios,
+  cargandoPersonas,
+  cargandoLugares,
+  cargandoObjetos,
+  cargandoEvidencias,
+  cargandoMovimientos,
+  cargandoTestimonios,
+  eventoCentral,
+  cargandoEvento,
+  errorEvento,
   onVerPersonas,
   onVerLugares,
   onVerObjetos,
   onVerEvidencias,
+  onVerMovimientos,
+  onVerTestimonios,
 }) {
+  const cantidades = {
+    personas: cantidadPersonas,
+    lugares: cantidadLugares,
+    objetos: cantidadObjetos,
+    evidencias: cantidadEvidencias,
+    movimientos: cantidadMovimientos,
+    testimonios: cantidadTestimonios,
+  }
+  const cargas = {
+    personas: cargandoPersonas,
+    lugares: cargandoLugares,
+    objetos: cargandoObjetos,
+    evidencias: cargandoEvidencias,
+    movimientos: cargandoMovimientos,
+    testimonios: cargandoTestimonios,
+  }
+  const accionesResumen = {
+    personas: onVerPersonas,
+    lugares: onVerLugares,
+    objetos: onVerObjetos,
+    evidencias: onVerEvidencias,
+    movimientos: onVerMovimientos,
+    testimonios: onVerTestimonios,
+  }
+
   /**
    * Entradas: configuración de una categoría del resumen.
    * Salidas: botón JSX con etiqueta, cantidad e indicador para ver detalles.
    * Restricciones: personas y lugares reciben el callback de detalle correspondiente.
    * Objetivo: renderizar una tarjeta del resumen del caso.
    */
-  function renderizarResumen({ clave, etiqueta, color }) {
+  function renderizarBotonesResumen({ clave, etiqueta, color }) {
     return (
       <Button
         className={`boton-resumen color-boton-${color}`}
         key={clave}
-        onClick={
-          clave === 'personas'
-            ? onVerPersonas
-            : clave === 'lugares'
-              ? onVerLugares
-              : clave === 'objetos'
-                ? onVerObjetos
-                : clave === 'evidencias'
-                  ? onVerEvidencias
-              : undefined
-        }
+        onClick={accionesResumen[clave]}
         type="button"
       >
         <span className="texto-resumen">{etiqueta}</span>
         <span className="cantidad-resumen">
-          {clave === 'personas'
-            ? mostrarCantidad(cantidadPersonas)
-            : clave === 'lugares'
-              ? mostrarCantidad(cantidadLugares)
-              : clave === 'objetos'
-                ? mostrarCantidad(cantidadObjetos)
-                : clave === 'evidencias'
-                  ? mostrarCantidad(cantidadEvidencias)
-            : mostrarCantidad(datosCaso?.[clave])}
+          {mostrarCantidad(cantidades[clave], cargas[clave])}
         </span>
         <span className="enlace-detalles">
           <span>Ver detalles</span>
@@ -98,18 +105,23 @@ function PanelDatos({
   return (
     <Box className="contenido-caso">
       <Typography className="etiqueta-evento" component="p" variant="overline">
-        Evento central
+        Caso
       </Typography>
-      <Typography className="nombre-evento" id="titulo-caso" component="h2" variant="h3">
-        {obtenerNombreEvento(datosCaso?.evento)}
+      <Typography
+        className="nombre-evento"
+        id="titulo-caso"
+        component="pre"
+        variant="p"
+      >
+        {errorEvento || (cargandoEvento ? 'Consultando...' : eventoCentral || 'No disponible')}
       </Typography>
 
       <Typography className="titulo-resumen" component="h3" variant="h5">
         Resumen de hechos registrados
       </Typography>
-      <Box className="resumen-caso">{resumenCaso.map(renderizarResumen)}</Box>
+      <Box className="resumen-caso">{resumenCaso.map(renderizarBotonesResumen)}</Box>
     </Box>
   )
 }
 
-export default PanelDatos
+export default ResumenHechos

@@ -1,12 +1,12 @@
 import { Alert, Box, CircularProgress, Typography } from '@mui/material'
 
 /**
- * Entradas: texto de respuesta, indicador cargando y mensaje error.
+ * Entradas: texto de respuesta, indicador cargando y mensaje de error.
  * Salidas: JSX para mostrar progreso, error o texto de salida de Prolog.
  * Restricciones: muestra el resultado solo cuando existe texto y no hay carga activa.
- * Objetivo: ser un componente reutilizable para resultados textuales de consultas.
+ * Objetivo: mostrar la respuesta textual de información del caso.
  */
-function ResultadoConsulta({ texto, cargando, error }) {
+function PanelTexto({ texto, cargando, error }) {
   return (
     <Box className="resultado-consulta" aria-live="polite">
       {cargando && (
@@ -18,7 +18,7 @@ function ResultadoConsulta({ texto, cargando, error }) {
 
       {error && <Alert severity="error">{error}</Alert>}
 
-      {texto && !cargando && (
+      {texto && !cargando && !error && (
         <Box component="pre" className="texto-resultado">
           {texto}
         </Box>
@@ -27,4 +27,4 @@ function ResultadoConsulta({ texto, cargando, error }) {
   )
 }
 
-export default ResultadoConsulta
+export default PanelTexto

@@ -1,15 +1,5 @@
-import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
-import { dirname } from 'node:path'
-import {
-  ARCHIVO_MAIN_PROLOG,
-  IMAGENES_PERSONAS,
-  MAX_BUFFER_TAMANO,
-  TIMEOUT_MILISEGUNDOS,
-  UTF_ENCODING,
-} from '../constants.js'
-
-const ejecutarArchivo = promisify(execFile)
+import { IMAGENES_PERSONAS } from '../constants.js'
+import { obtenerRespuestaProlog } from './prolog.services.js'
 
 /**
  * Entradas: un texto que representa un átomo de Prolog.
@@ -53,20 +43,7 @@ export function asignarImagenesPersonas(personas) {
  * Objetivo: ejecutar interfaz_consultar_personas y devolver el objeto JSON al controlador.
  */
 export async function obtenerPersonasCaso() {
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
-    ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', 'interfaz_consultar_personas,halt'],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
-  )
-
-  if (typeof stdout !== 'string') {
-    throw new Error('Prolog devolvió una respuesta de personas inválida.')
-  }
+  const stdout = await obtenerRespuestaProlog('interfaz_consultar_personas')
 
   const [cantidadTexto, ...personas] = stdout.trim() ? stdout.trim().split(/\r?\n/) : [] // Dividir en líneas, considerando tanto \r como \n.
   const cantidad = Number(cantidadTexto)

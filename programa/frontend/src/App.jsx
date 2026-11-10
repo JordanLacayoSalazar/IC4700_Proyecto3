@@ -2,8 +2,8 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import rolDetectiveImg from './assets/rol_detective.png'
-import Bienvenida from './components/bienvenida.jsx'
-import MenuPrincipal from './components/menuPrincipal.jsx'
+import Bienvenida from './pages/bienvenida.jsx'
+import MenuPrincipal from './pages/menuPrincipal.jsx'
 
 /**
  * Entradas: ninguna.

@@ -1,20 +1,13 @@
-import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
-import { dirname } from 'node:path'
 import {
   asignarImagenesPersonas,
   esAtomoValido,
   obtenerPersonasCaso,
 } from './personas.services.js'
+import { IMAGEN_PERSONA_DEFAULT } from '../constants.js'
 import {
-  ARCHIVO_MAIN_PROLOG,
-  IMAGEN_PERSONA_DEFAULT,
-  MAX_BUFFER_TAMANO,
-  TIMEOUT_MILISEGUNDOS,
-  UTF_ENCODING,
-} from '../constants.js'
-
-const ejecutarArchivo = promisify(execFile)
+  obtenerRespuestaProlog,
+  obtenerRespuestaPrologConArgumentos,
+} from './prolog.services.js'
 
 /**
  * Entradas: ninguna.
@@ -23,22 +16,76 @@ const ejecutarArchivo = promisify(execFile)
  * Objetivo: ejecutar la consulta y devolver el texto al controlador.
  */
 export async function obtenerInformacionCaso() {
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
-    ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', 'opcion_consultar_caso,halt'],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
-  )
+  const stdout = await obtenerRespuestaProlog('opcion_consultar_caso')
 
   if (typeof stdout !== 'string' || !stdout.trim()) {
     throw new Error('Prolog no devolvió información del caso.')
   }
 
   return stdout.trim()
+}
+
+export async function obtenerEventoCaso() {
+  const stdout = await obtenerRespuestaProlog('mostrar_evento')
+  if (!stdout.trim()) {
+    throw new Error('Prolog no devolvió el evento central.')
+  }
+
+  return stdout
+}
+
+export async function obtenerPosiblesResponsablesCaso() {
+  return obtenerRespuestaProlog('opcion_posibles_responsables')
+}
+
+export async function obtenerExplicacionesCaso(persona) {
+  if (persona !== undefined && persona !== null && persona !== '' && !esAtomoValido(persona)) {
+    throw new Error('El nombre de la persona no es válido.')
+  }
+
+  return obtenerRespuestaPrologConArgumentos('interfaz_generar_explicaciones', [persona])
+}
+
+export async function investigarPersonaCaso(persona) {
+  if (persona !== undefined && persona !== null && persona !== '' && !esAtomoValido(persona)) {
+    throw new Error('El nombre de la persona no es válido.')
+  }
+
+  return obtenerRespuestaPrologConArgumentos('interfaz_investigar_persona', [persona])
+}
+
+export async function consultarMovimientoPorHora(persona, lugar, hora) {
+  validarAtomosConsulta(persona, lugar)
+  return obtenerRespuestaPrologConArgumentos('interfaz_consultar_estadia', [
+    persona,
+    lugar,
+    hora,
+  ])
+}
+
+export async function consultarMovimientosPorIntervalo(persona, lugar, inicio, fin) {
+  validarAtomosConsulta(persona, lugar)
+  return obtenerRespuestaPrologConArgumentos('interfaz_consultar_intervalo', [
+    persona,
+    lugar,
+    inicio,
+    fin,
+  ])
+}
+
+function validarAtomosConsulta(persona, lugar) {
+  for (const [valor, etiqueta] of [
+    [persona, 'persona'],
+    [lugar, 'lugar'],
+  ]) {
+    if (valor !== undefined && valor !== null && valor !== '' && !esAtomoValido(valor)) {
+      throw new Error(`El nombre de ${etiqueta} no es válido.`)
+    }
+  }
+}
+
+export async function obtenerResolucionCaso() {
+  return obtenerRespuestaProlog('opcion_resolver_caso')
 }
 
 /**
@@ -88,20 +135,7 @@ export function parsearLugares(lineas) {
  * Objetivo: ejecutar la consulta y devolver cantidad y lugares al controlador.
  */
 export async function obtenerLugaresCaso() {
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
-    ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', 'interfaz_consultar_lugares,halt'],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
-  )
-
-  if (typeof stdout !== 'string') {
-    throw new Error('Prolog devolvió una respuesta de lugares inválida.')
-  }
+  const stdout = await obtenerRespuestaProlog('interfaz_consultar_lugares')
 
   const textoLimpio = stdout.trim()
   const [cantidadTexto, ...lineas] = textoLimpio
@@ -175,20 +209,7 @@ export function parsearObjetos(lineas) {
  * Objetivo: ejecutar la consulta y devolver cantidad y objetos al controlador.
  */
 export async function obtenerObjetosCaso() {
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
-    ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', 'interfaz_consultar_objetos,halt'],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
-  )
-
-  if (typeof stdout !== 'string') {
-    throw new Error('Prolog devolvió una respuesta de objetos inválida.')
-  }
+  const stdout = await obtenerRespuestaProlog('interfaz_consultar_objetos')
 
   const textoLimpio = stdout.trim()
   const [cantidadTexto, ...lineas] = textoLimpio ? textoLimpio.split(/\r?\n/) : []
@@ -203,8 +224,8 @@ export async function obtenerObjetosCaso() {
 /**
  * Entradas: líneas producidas por interfaz_consultar_evidencias en Prolog.
  * Salidas: evidencias con nombre, ubicación, hora en texto HH:MM y personas relacionadas.
- * Restricciones: cada línea contiene cuatro campos separados por |; la lista de personas
- * puede estar vacía y los valores de persona/lugar/evidencia deben ser átomos.
+ * Restricciones: cada línea contiene cuatro campos separados por |. La lista de personas
+ *                puede estar vacía y los valores de persona/lugar/evidencia deben ser átomos.
  * Objetivo: validar y convertir las evidencias y sus correspondencias.
  */
 export function parsearEvidencias(lineas) {
@@ -242,23 +263,10 @@ export function parsearEvidencias(lineas) {
  * Salidas: objeto con la cantidad de evidencias informada por Prolog y la lista con
  * personas relacionadas e imágenes asignadas.
  * Restricciones: Prolog imprime la cantidad en la primera línea y luego una línea por evidencia.
- * Objetivo: ejecutar interfaz_consultar_evidencias y preparar la respuesta de la API.
+ * Objetivo: ejecutar la consulta y devolver cantidad y evidencias al controlador.
  */
 export async function obtenerEvidenciasCaso() {
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
-    ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', 'interfaz_consultar_evidencias,halt'],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
-  )
-
-  if (typeof stdout !== 'string') {
-    throw new Error('Prolog devolvió una respuesta de evidencias inválida.')
-  }
+  const stdout = await obtenerRespuestaProlog('interfaz_consultar_evidencias')
 
   const textoLimpio = stdout.trim()
   const [cantidadTexto, ...lineas] = textoLimpio
@@ -287,4 +295,88 @@ export async function obtenerEvidenciasCaso() {
       })),
     })),
   }
+}
+
+/**
+ * Entradas: líneas de salida de interfaz_consultar_movimientos o
+ * interfaz_consultar_testimonios.
+ * Salidas: cantidad de registros y registros individuales con nombre y texto.
+ * Restricciones: cada línea contiene dos campos separados por |. El nombre debe ser un átomo Prolog y el texto no puede estar vacío.
+ * Objetivo: validar y convertir la salida de Prolog a un arreglo que pueda entender el frontend.
+ */
+export function parsearRegistrosPersona(lineas) {
+  if (!Array.isArray(lineas)) {
+    throw new Error('Prolog devolvió una lista de registros inválida.')
+  }
+
+  return lineas.map((linea) => {
+    if (typeof linea !== 'string') {
+      throw new Error('Prolog devolvió una línea de registro inválida.')
+    }
+
+    const separador = linea.indexOf('|')
+    if (separador < 0) {
+      throw new Error('Prolog devolvió un registro con formato inválido.')
+    }
+
+    const nombre = linea.slice(0, separador)
+    const texto = linea.slice(separador + 1)
+    if (!esAtomoValido(nombre) || !texto.trim()) {
+      throw new Error('Prolog devolvió datos de registro inválidos.')
+    }
+
+    return { nombre, texto }
+  })
+}
+
+/**
+ * Entradas: nombre de un predicado Prolog que devuelve registros de personas con un texto
+ *           (formato: nombre|texto).
+ * Salidas: cantidad de registros, y registros individuales con nombre, imagen y texto.
+ * Restricciones: Prolog imprime la cantidad en la primera línea y luego una línea por registro.
+ * Objetivo: reutilizar esta función para obtener registros de movimientos y testimonios del caso, asignando imágenes a las personas.
+ */
+async function obtenerRegistrosPersona(predicado) {
+  const stdout = await obtenerRespuestaProlog(predicado)
+  const textoLimpio = stdout.trim()
+  const [cantidadTexto, ...lineas] = textoLimpio ? textoLimpio.split(/\r?\n/) : []
+  const cantidad = Number(cantidadTexto)
+  if (!Number.isInteger(cantidad) || cantidad < 0) {
+    throw new Error('Prolog devolvió una cantidad de registros inválida.')
+  }
+
+  const registros = parsearRegistrosPersona(lineas)
+  const resultadoPersonas = await obtenerPersonasCaso()
+  const imagenPorNombre = new Map(
+    resultadoPersonas.personas.map(({ nombre, imagen }) => [nombre, imagen]),
+  )
+
+  return {
+    cantidad,
+    registros: registros.map(({ nombre, texto }) => ({
+      nombre,
+      imagen: imagenPorNombre.get(nombre) ?? IMAGEN_PERSONA_DEFAULT,
+      texto,
+    })),
+  }
+}
+
+/**
+ * Entradas: ninguna.
+ * Salidas: cantidad de movimientos y registros individuales con persona, imagen y texto.
+ * Restricciones: ninguna.
+ * Objetivo: consultar los movimientos del caso para enviarlos al controlador.
+ */
+export async function obtenerMovimientosCaso() {
+  return obtenerRegistrosPersona('interfaz_consultar_movimientos')
+}
+
+/**
+ * Entradas: ninguna.
+ * Salidas: cantidad de testimonios y registros individuales con persona, imagen y texto.
+ * Restricciones: ninguna.
+ * Objetivo: consultar los testimonios del caso para enviarlos al controlador.
+ */
+export async function obtenerTestimoniosCaso() {
+  return obtenerRegistrosPersona('interfaz_consultar_testimonios')
 }

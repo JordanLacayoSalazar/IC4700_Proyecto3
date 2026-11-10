@@ -17,7 +17,7 @@ persona(cristian).
 
 % Entradas: ninguna.
 % Salidas: Nombre del lugar y su Descripcion.
-% Restricciones: Nombre debe ser un atomo unico; Descripcion debe ser un string.
+% Restricciones: Nombre debe ser un atomo unico. Descripcion debe ser un string.
 % Objetivo: definir las salas de la nave relevantes para la investigacion.
 
 lugar(cafeteria, "Cafeteria central de la nave, punto de reunion de la tripulacion.").
@@ -143,7 +143,7 @@ estuvo(cristian, navegacion, 1958).
 
 % Entradas: ninguna.
 % Salidas: Nombre del evento, Lugar y Hora en que ocurrio.
-% Restricciones: debe existir un unico evento por caso; Lugar debe estar definido en lugar/2 y Hora en formato HHMM.
+% Restricciones: debe existir un unico evento por caso. Lugar debe estar definido en lugar/2 y Hora en formato HHMM.
 % Objetivo: definir el evento central que debe ser investigado.
 
 evento(sabotaje, electricidad, 2000).
@@ -151,7 +151,7 @@ evento(sabotaje, electricidad, 2000).
 
 % Entradas: ninguna.
 % Salidas: Evidencia, Lugar y Hora en que fue encontrada.
-% Restricciones: Evidencia debe ser un atomo unico; Lugar debe estar definido en lugar/2 y Hora en formato HHMM.
+% Restricciones: Evidencia debe ser un atomo unico. Lugar debe estar definido en lugar/2 y Hora en formato HHMM.
 % Objetivo: registrar las evidencias encontradas durante la investigacion.
 
 evidencia(cables_cortados, electricidad, 2000).
