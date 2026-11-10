@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { promisify } from 'node:util'
 import { dirname } from 'node:path'
 import {
@@ -9,11 +10,38 @@ import {
 } from '../constants.js'
 
 const ejecutarArchivo = promisify(execFile)
+const RUTA_SWIPL_WINDOWS = 'C:\\Program Files\\swipl\\bin\\swipl.exe'
+const EJECUTABLE_SWIPL =
+  process.env.SWIPL_PATH ||
+  (process.platform === 'win32' && existsSync(RUTA_SWIPL_WINDOWS)
+    ? RUTA_SWIPL_WINDOWS
+    : 'swipl')
+
+async function ejecutarConsultaProlog(argumentos, predicado) {
+  try {
+    return await ejecutarArchivo(EJECUTABLE_SWIPL, argumentos, {
+      cwd: dirname(ARCHIVO_MAIN_PROLOG),
+      encoding: UTF_ENCODING,
+      maxBuffer: MAX_BUFFER_TAMANO,
+      timeout: TIMEOUT_MILISEGUNDOS,
+    })
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error(
+        `No se encontró SWI-Prolog para ejecutar ${predicado}. Agregue swipl al PATH o configure SWIPL_PATH con la ruta completa a su ejecutable.`,
+        { cause: error },
+      )
+    }
+
+    throw error
+  }
+}
 
 /**
  * Entradas: nombre de un predicado Prolog sin argumentos.
  * Salidas: texto escrito por el predicado en la salida estándar.
- * Restricciones: Se requiere que SWI-Prolog esté instalado y que el archivo main.pl contenga el predicado solicitado.
+ * Restricciones: Se requiere que SWI-Prolog esté instalado, disponible mediante SWIPL_PATH o PATH (o en su ruta estándar de Windows),
+ *                y que el archivo main.pl contenga el predicado solicitado.
  *                Además, el nombre del predicado debe ser una cadena de caracteres de letras minúsculas y guiones bajos.
  * Objetivo: reutilizar esta función para ejecutar todas las consultas Prolog del backend.
  */
@@ -22,15 +50,9 @@ export async function obtenerRespuestaProlog(predicado) {
     throw new Error('El nombre del predicado Prolog no es válido.')
   }
 
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
+  const { stdout } = await ejecutarConsultaProlog(
     ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', `${predicado},halt`],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
+    predicado,
   )
 
   if (typeof stdout !== 'string') {
@@ -71,15 +93,9 @@ export async function obtenerRespuestaPrologConArgumentos(predicado, argumentos)
   })
 
   const objetivo = `${predicado}(${terminos.join(',')}),halt`
-  const { stdout } = await ejecutarArchivo(
-    'swipl',
+  const { stdout } = await ejecutarConsultaProlog(
     ['-q', '-s', ARCHIVO_MAIN_PROLOG, '-g', objetivo],
-    {
-      cwd: dirname(ARCHIVO_MAIN_PROLOG),
-      encoding: UTF_ENCODING,
-      maxBuffer: MAX_BUFFER_TAMANO,
-      timeout: TIMEOUT_MILISEGUNDOS,
-    },
+    predicado,
   )
 
   if (typeof stdout !== 'string') {
